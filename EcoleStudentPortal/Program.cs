@@ -1,3 +1,6 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using EcoleStudentPortal.Data;
 
 namespace EcoleStudentPortal
 {
@@ -6,6 +9,8 @@ namespace EcoleStudentPortal
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<EcoleStudentPortalContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("EcoleStudentPortalContext") ?? throw new InvalidOperationException("Connection string 'EcoleStudentPortalContext' not found.")));
 
             // Add services to the container.
 
