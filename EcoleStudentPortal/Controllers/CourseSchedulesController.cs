@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EcoleStudentPortal.Data;
 using EcoleStudentPortal.Models;
 
-namespace EcoleStudentPortal
+namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

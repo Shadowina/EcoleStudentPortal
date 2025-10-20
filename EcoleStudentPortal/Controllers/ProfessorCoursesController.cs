@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EcoleStudentPortal.Data;
 using EcoleStudentPortal.Models;
 
-namespace EcoleStudentPortal
+namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
