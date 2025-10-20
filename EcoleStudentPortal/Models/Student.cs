@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
 
 namespace EcoleStudentPortal.Models
 {
@@ -10,6 +9,7 @@ namespace EcoleStudentPortal.Models
         [Required]
         public int Year { get; set; }
 
+        [Column(TypeName = "decimal(5,2)")]
         public decimal? AverageGrade { get; set; }
 
         [ForeignKey("Programme")]

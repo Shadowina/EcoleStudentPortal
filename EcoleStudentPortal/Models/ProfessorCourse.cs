@@ -2,7 +2,6 @@
 
 namespace EcoleStudentPortal.Models
 {
-
     // Join table - composite PK configured in OnModelCreating
     [Table("ProfessorCourses")]
     public class ProfessorCourse

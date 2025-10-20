@@ -9,7 +9,9 @@ namespace EcoleStudentPortal.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required] public string DepartmentName { get; set; } = default!;
+        [Required]
+        public string DepartmentName { get; set; } = default!;
+
         public string? Description { get; set; }
 
         [ForeignKey("DepartmentAdmin")]

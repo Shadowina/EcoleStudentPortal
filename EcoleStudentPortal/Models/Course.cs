@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
 
 namespace EcoleStudentPortal.Models
 {
@@ -10,9 +9,14 @@ namespace EcoleStudentPortal.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required] public string CourseName { get; set; } = default!;
+        [Required]
+        public string CourseName { get; set; } = default!;
+
         public string? Description { get; set; }
-        [Required] public int CreditWeight { get; set; }
+
+        [Required]
+        public int CreditWeight { get; set; }
+
         public string? CourseContent { get; set; }
 
         // 1:N with CourseSchedule

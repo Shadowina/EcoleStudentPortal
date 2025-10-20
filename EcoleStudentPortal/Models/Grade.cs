@@ -14,6 +14,7 @@ namespace EcoleStudentPortal.Models
         public Guid CourseId { get; set; }
         public virtual Course Course { get; set; } = default!;
 
-        public decimal? Score { get; set; } // e.g., precision 5,2 via Fluent API
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? Score { get; set; }
     }
 }

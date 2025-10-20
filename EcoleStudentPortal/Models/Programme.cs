@@ -9,9 +9,14 @@ namespace EcoleStudentPortal.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required] public string ProgrammeName { get; set; } = default!;
-        [Required] public DateOnly SessionStart { get; set; }
-        [Required] public DateOnly SessionEnd { get; set; }
+        [Required]
+        public string ProgrammeName { get; set; } = default!;
+
+        [Required]
+        public DateOnly SessionStart { get; set; }
+
+        [Required]
+        public DateOnly SessionEnd { get; set; }
 
         [ForeignKey("Department")]
         public Guid DepartmentId { get; set; }

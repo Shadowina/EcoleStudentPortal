@@ -9,10 +9,17 @@ namespace EcoleStudentPortal.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required] public string Location { get; set; } = default!;
-        [Required] public DateOnly Date { get; set; }
-        [Required] public TimeOnly StartTime { get; set; }
-        [Required] public TimeOnly EndTime { get; set; }
+        [Required]
+        public string Location { get; set; } = default!;
+
+        [Required]
+        public DateOnly Date { get; set; }
+
+        [Required]
+        public TimeOnly StartTime { get; set; }
+
+        [Required]
+        public TimeOnly EndTime { get; set; }
 
         [ForeignKey("Course")]
         public Guid CourseId { get; set; }
