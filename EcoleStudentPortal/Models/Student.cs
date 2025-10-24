@@ -4,8 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace EcoleStudentPortal.Models
 {
     [Table("Students")]
-    public class Student : User
+    public class Student
     {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
+        [ForeignKey("User")]
+        public Guid UserId { get; set; }
+        public virtual User User { get; set; } = default!;
+
         [Required]
         public int Year { get; set; }
 

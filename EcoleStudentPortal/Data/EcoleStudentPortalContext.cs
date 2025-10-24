@@ -26,6 +26,25 @@ namespace EcoleStudentPortal.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure User relationships
+            modelBuilder.Entity<Student>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Professor>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DepartmentAdmin>()
+                .HasOne(da => da.User)
+                .WithMany()
+                .HasForeignKey(da => da.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configure Grade entity with composite primary key
             modelBuilder.Entity<Grade>()
                 .HasKey(g => new { g.StudentId, g.CourseId });
