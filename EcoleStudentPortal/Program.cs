@@ -56,6 +56,16 @@ namespace EcoleStudentPortal
 
             app.MapControllers();
 
+            // addition for database creation
+#pragma warning disable CS8602 // Dereferencing a possible null reference.
+            using (var serviceScope = app.Services.GetService<IServiceScopeFactory>().CreateScope())
+#pragma warning restore CS8602 // Dereferencing a possible null reference.
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<EcoleStudentPortalContext>();
+                //context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+            }
+
             app.Run();
         }
     }
