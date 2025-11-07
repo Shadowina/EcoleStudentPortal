@@ -362,4 +362,10 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Local configuration files (Mac-specific)
+appsettings.Local.json
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
 docs

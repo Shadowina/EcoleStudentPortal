@@ -178,9 +178,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Show success message
         showSuccess(`Account created successfully! Welcome, ${response.firstName}! Redirecting...`, cardBody);
 
-        // Redirect to dashboard
+        // Redirect to role-specific dashboard
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          const dashboardUrl = getDashboardUrl(response.userType);
+          window.location.href = dashboardUrl;
         }, 1500);
       } catch (error) {
         showError(error.message || 'Registration failed. Please try again.', cardBody);
@@ -251,9 +252,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Show success message
         showSuccess(`Welcome back, ${response.firstName}! Redirecting...`, cardBody);
 
-        // Redirect to dashboard
+        // Redirect to role-specific dashboard
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
+          const dashboardUrl = getDashboardUrl(response.userType);
+          window.location.href = dashboardUrl;
         }, 1500);
       } catch (error) {
         showError(error.message || 'Login failed. Please check your credentials.', cardBody);
@@ -262,6 +264,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
 });
+
+// Get dashboard URL based on user type
+function getDashboardUrl(userType) {
+  switch (userType) {
+    case 'Student':
+      return 'student/dashboard.html';
+    case 'Professor':
+      return 'professor/dashboard.html';
+    case 'DepartmentAdmin':
+      return 'admin/dashboard.html';
+    default:
+      return 'login.html';
+  }
+}
 

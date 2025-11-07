@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Department Admin Dashboard · Ecole Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="../assets/css/styles.css" rel="stylesheet" />
+  <link href="../assets/css/layout.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <div class="user-avatar"></div>
+        <div class="user-info">
+          <div class="user-role">DEPARTMENT ADMIN</div>
+          <div class="user-name">Loading...</div>
+        </div>
+        <button class="sidebar-toggle" aria-label="Toggle sidebar">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation -->
+      <nav class="sidebar-nav">
+        <!-- Main Navigation -->
+        <div class="nav-section">
+          <div class="nav-section-label">Main</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="dashboard.html" class="nav-link active" data-tooltip="Home">
+                <i class="bi bi-house nav-icon"></i>
+                <span class="nav-text">Home</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="staff-directory.html" class="nav-link" data-tooltip="Staff Directory">
+                <i class="bi bi-people nav-icon"></i>
+                <span class="nav-text">Staff Directory</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="programme-management.html" class="nav-link" data-tooltip="Programme Management">
+                <i class="bi bi-journal-text nav-icon"></i>
+                <span class="nav-text">Programme Management</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="course-scheduling.html" class="nav-link" data-tooltip="Course Scheduling">
+                <i class="bi bi-calendar-event nav-icon"></i>
+                <span class="nav-text">Course Scheduling</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="analytics.html" class="nav-link" data-tooltip="Analytics">
+                <i class="bi bi-graph-up nav-icon"></i>
+                <span class="nav-text">Analytics</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="communications.html" class="nav-link" data-tooltip="Communications">
+                <i class="bi bi-megaphone nav-icon"></i>
+                <span class="nav-text">Communications</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="nav-section">
+          <div class="nav-section-label">Settings</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="settings.html" class="nav-link" data-tooltip="Settings">
+                <i class="bi bi-gear nav-icon"></i>
+                <span class="nav-text">Settings</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="help.html" class="nav-link" data-tooltip="Help">
+              <i class="bi bi-question-circle nav-icon"></i>
+              <span class="nav-text">Help</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link logout" data-tooltip="Logout">
+              <i class="bi bi-box-arrow-right nav-icon"></i>
+              <span class="nav-text">Logout Account</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Content Header -->
+      <header class="content-header">
+        <h1 class="content-title">Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn btn-outline-primary">
+            <i class="bi bi-bell me-2"></i>Notifications
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <div class="content-body">
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1 small">Pending Approvals</p>
+                    <h3 class="mb-0 fw-bold">12</h3>
+                  </div>
+                  <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                    <i class="bi bi-check-circle text-primary fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1 small">Active Programmes</p>
+                    <h3 class="mb-0 fw-bold">8</h3>
+                  </div>
+                  <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                    <i class="bi bi-journal-text text-success fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1 small">Total Staff</p>
+                    <h3 class="mb-0 fw-bold">45</h3>
+                  </div>
+                  <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                    <i class="bi bi-people text-info fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1 small">Upcoming Meetings</p>
+                    <h3 class="mb-0 fw-bold">5</h3>
+                  </div>
+                  <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                    <i class="bi bi-calendar-event text-warning fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions & Reminders -->
+        <div class="row g-4">
+          <!-- Quick Actions -->
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-bold">Quick Actions</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <a href="programme-management.html" class="text-decoration-none">
+                      <div class="p-3 border rounded hover-shadow">
+                        <i class="bi bi-plus-circle text-primary me-2"></i>
+                        <strong>Create New Programme</strong>
+                        <p class="text-muted small mb-0 mt-1">Set up a new academic programme</p>
+                      </div>
+                    </a>
+                  </div>
+                  <div class="col-md-6">
+                    <a href="course-scheduling.html" class="text-decoration-none">
+                      <div class="p-3 border rounded hover-shadow">
+                        <i class="bi bi-calendar-plus text-primary me-2"></i>
+                        <strong>Schedule Course</strong>
+                        <p class="text-muted small mb-0 mt-1">Add new course to schedule</p>
+                      </div>
+                    </a>
+                  </div>
+                  <div class="col-md-6">
+                    <a href="communications.html" class="text-decoration-none">
+                      <div class="p-3 border rounded hover-shadow">
+                        <i class="bi bi-megaphone text-primary me-2"></i>
+                        <strong>Send Announcement</strong>
+                        <p class="text-muted small mb-0 mt-1">Broadcast message to department</p>
+                      </div>
+                    </a>
+                  </div>
+                  <div class="col-md-6">
+                    <a href="staff-directory.html" class="text-decoration-none">
+                      <div class="p-3 border rounded hover-shadow">
+                        <i class="bi bi-person-plus text-primary me-2"></i>
+                        <strong>Add Staff Member</strong>
+                        <p class="text-muted small mb-0 mt-1">Register new faculty member</p>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reminders Timeline -->
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0 fw-bold">Recent Activity</h5>
+              </div>
+              <div class="card-body">
+                <div class="timeline">
+                  <div class="timeline-item mb-3">
+                    <div class="d-flex">
+                      <div class="timeline-marker bg-primary rounded-circle me-3"></div>
+                      <div>
+                        <p class="mb-1 small"><strong>New Programme Created</strong></p>
+                        <p class="text-muted small mb-0">Computer Science Programme</p>
+                        <p class="text-muted small">2 hours ago</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-item mb-3">
+                    <div class="d-flex">
+                      <div class="timeline-marker bg-success rounded-circle me-3"></div>
+                      <div>
+                        <p class="mb-1 small"><strong>Staff Added</strong></p>
+                        <p class="text-muted small mb-0">Professor John Doe</p>
+                        <p class="text-muted small">5 hours ago</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline-item mb-3">
+                    <div class="d-flex">
+                      <div class="timeline-marker bg-warning rounded-circle me-3"></div>
+                      <div>
+                        <p class="mb-1 small"><strong>Approval Pending</strong></p>
+                        <p class="text-muted small mb-0">Course Schedule Request</p>
+                        <p class="text-muted small">1 day ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/layout.js"></script>
+</body>
+
+</html>
+

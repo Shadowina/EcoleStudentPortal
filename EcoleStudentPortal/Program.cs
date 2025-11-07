@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using EcoleStudentPortal.Data;
+using EcoleStudentPortal.Models;
 
 namespace EcoleStudentPortal
 {
@@ -12,8 +13,29 @@ namespace EcoleStudentPortal
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            
+            // Load local configuration file if it exists (for Mac development)
+            // This will override appsettings.json values since it's loaded after
+            builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+            
+            // Configure database based on connection string
+            var connectionString = builder.Configuration.GetConnectionString("EcoleStudentPortalContext") 
+                ?? throw new InvalidOperationException("Connection string 'EcoleStudentPortalContext' not found.");
+            
             builder.Services.AddDbContext<EcoleStudentPortalContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("EcoleStudentPortalContext") ?? throw new InvalidOperationException("Connection string 'EcoleStudentPortalContext' not found.")));
+            {
+                // Use SQLite if connection string starts with "Data Source=" (SQLite format)
+                // Otherwise use SQL Server (default for Windows)
+                if (connectionString.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase) || 
+                    connectionString.StartsWith("DataSource=", StringComparison.OrdinalIgnoreCase))
+                {
+                    options.UseSqlite(connectionString);
+                }
+                else
+                {
+                    options.UseSqlServer(connectionString);
+                }
+            });
 
             // Add services to the container.
 
@@ -76,9 +98,52 @@ namespace EcoleStudentPortal
                 var context = serviceScope.ServiceProvider.GetRequiredService<EcoleStudentPortalContext>();
                 //context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
+                
+                // Create master admin user
+                SeedMasterAdmin(context);
             }
 
             app.Run();
+        }
+
+        private static void SeedMasterAdmin(EcoleStudentPortalContext context)
+        {
+            const string adminEmail = "admin@ecole.com";
+            const string adminPassword = "password";
+
+            // Check if admin already exists
+            var existingAdmin = context.Users.FirstOrDefault(u => u.Email == adminEmail);
+            if (existingAdmin != null)
+            {
+                return; 
+            }
+
+            // Create master admin user
+            var adminUser = new User
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Master",
+                LastName = "Admin",
+                Email = adminEmail,
+                Password = adminPassword,
+                RegistrationNumber = $"ADM-{DateTime.UtcNow:yyyyMMdd}-000000-001",
+                Address = null,
+                PostalCode = null
+            };
+
+            context.Users.Add(adminUser);
+
+            // Create DepartmentAdmin profile
+            var departmentAdmin = new DepartmentAdmin
+            {
+                Id = Guid.NewGuid(),
+                UserId = adminUser.Id,
+                RoleTitle = "Master Administrator"
+            };
+
+            context.DepartmentAdmins.Add(departmentAdmin);
+
+            context.SaveChanges();
         }
     }
 }
