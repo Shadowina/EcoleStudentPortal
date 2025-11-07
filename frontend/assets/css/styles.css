@@ -1,0 +1,181 @@
+:root {
+  --ecole-primary: #0b4f6c;
+  --ecole-secondary: #3282b8;
+  --ecole-accent: #f9a826;
+  --ecole-light: #f7fafc;
+  --ecole-muted: #6b7280;
+  --ecole-dark: #0c1c2c;
+  --font-sans: "Poppins", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: linear-gradient(135deg, rgba(11, 79, 108, 0.12), rgba(50, 130, 184, 0.08)), var(--ecole-light);
+  color: var(--ecole-dark);
+  min-height: 100vh;
+}
+
+.brand-highlight {
+  color: var(--ecole-primary);
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 3rem 1rem;
+  background: radial-gradient(circle at top left, rgba(50, 130, 184, 0.18), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(249, 168, 38, 0.18), transparent 55%);
+}
+
+.auth-card {
+  border: none;
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 60px rgba(12, 28, 44, 0.12), 0 8px 24px rgba(12, 28, 44, 0.08);
+  overflow: hidden;
+}
+
+.auth-card .card-header {
+  background: linear-gradient(135deg, var(--ecole-primary), var(--ecole-secondary));
+  color: white;
+  padding: 2rem;
+}
+
+.auth-card .card-body {
+  padding: 2.5rem;
+}
+
+.feature-badge {
+  background: rgba(11, 79, 108, 0.08);
+  color: var(--ecole-primary);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.9rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--ecole-dark);
+}
+
+.form-control,
+.form-select {
+  border-radius: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(12, 28, 44, 0.1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(11, 79, 108, 0.45);
+  box-shadow: 0 0 0 0.2rem rgba(50, 130, 184, 0.25);
+}
+
+/* Standard button styling - ensures all buttons have consistent height */
+.btn {
+  min-height: 48px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--ecole-primary), var(--ecole-secondary));
+  border: none;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #094a63, #2a72a0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 79, 108, 0.3);
+  color: white;
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(11, 79, 108, 0.2);
+}
+
+.btn-outline-primary {
+  border-width: 2px;
+  color: var(--ecole-primary);
+  border-color: rgba(11, 79, 108, 0.3);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: rgba(11, 79, 108, 0.12);
+  border-color: var(--ecole-primary);
+  color: #063d52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 79, 108, 0.2);
+}
+
+.btn-outline-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(11, 79, 108, 0.15);
+}
+
+.subtle-link {
+  color: var(--ecole-muted);
+  font-size: 0.9rem;
+}
+
+.subtle-link:hover {
+  color: var(--ecole-primary);
+}
+
+.form-text {
+  color: var(--ecole-muted);
+}
+
+.input-hint {
+  font-size: 0.85rem;
+  color: var(--ecole-muted);
+}
+
+.page-footer {
+  font-size: 0.85rem;
+  color: rgba(12, 28, 44, 0.65);
+}
+
+.bg-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+}
+
+/* Ensure side-by-side buttons have equal widths */
+.btn-equal-group {
+  display: flex;
+}
+.btn-equal-group .btn {
+  flex: 1 1 0;
+}
+
+@media (max-width: 576px) {
+  .auth-card .card-body {
+    padding: 1.75rem;
+  }
+
+  .auth-wrapper {
+    padding: 2.5rem 1rem;
+  }
+}
+

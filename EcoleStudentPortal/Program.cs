@@ -41,6 +41,17 @@ namespace EcoleStudentPortal
 
             builder.Services.AddAuthorization();
 
+            // Add CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -50,6 +61,7 @@ namespace EcoleStudentPortal
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 

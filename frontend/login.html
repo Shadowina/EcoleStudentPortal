@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ecole Portal · Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="assets/css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="auth-wrapper">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8 mx-auto text-start">
+          <div class="feature-badge mb-3">
+            <span class="text-uppercase">Welcome Back</span>
+            <span class="badge bg-warning text-dark rounded-pill">Portal</span>
+          </div>
+          <h1 class="fw-bold display-6 mb-4">Ecole Portal <span class="brand-highlight">Sign&nbsp;In</span></h1>
+          <p class="lead text-muted mb-5">
+            Access your personalized workspace and stay up to date with campus activities and resources.
+          </p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+          <div class="card auth-card bg-glass">
+            <div class="card-header">
+              <h2 class="h3 mb-1">Sign in to continue</h2>
+              <p class="mb-0 opacity-75">Use your email address to sign in.</p>
+            </div>
+            <div class="card-body">
+              <form id="loginForm" novalidate>
+                <div class="mb-4">
+                  <label for="loginEmail" class="form-label">Email address</label>
+                  <input type="email" class="form-control" id="loginEmail" placeholder="jane.doe@ecole.edu" required />
+                </div>
+
+                <div class="mb-4">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <label for="loginPassword" class="form-label mb-0">Password</label>
+                    <a class="subtle-link" href="#" data-bs-toggle="tooltip" title="Feature coming soon">Forgot password?</a>
+                  </div>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required />
+                    <button class="btn btn-outline-primary" type="button" aria-label="Show password"
+                      data-toggle="password" data-target="#loginPassword">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+
+                
+
+                <div class="d-grid gap-3">
+                  <button type="submit" class="btn btn-primary">Sign in</button>
+                  <a href="register.html" class="btn btn-outline-primary">Create an account</a>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer bg-transparent py-3 text-center">
+              <small class="text-muted">By signing in you agree to the Ecole Portal usage policy.</small>
+            </div>
+          </div>
+
+          <footer class="page-footer text-center mt-4">
+            <small>&copy; <span data-year></span> Ecole Portal. All rights reserved.</small>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+
+</html>
+
