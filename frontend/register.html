@@ -60,7 +60,32 @@
                       <option>Professor</option>
                     </select>
                   </div>
-                  
+                  <div class="col-12" id="specializationField" style="display: none;">
+                    <label for="specialization" class="form-label">Specialization</label>
+                    <select class="form-select" id="specialization">
+                      <option value="" selected disabled>Select your specialization</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Electrical Engineering">Electrical Engineering</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                      <option value="Chemical Engineering">Chemical Engineering</option>
+                      <option value="Aerospace Engineering">Aerospace Engineering</option>
+                      <option value="Biomedical Engineering">Biomedical Engineering</option>
+                      <option value="Industrial Engineering">Industrial Engineering</option>
+                      <option value="Environmental Engineering">Environmental Engineering</option>
+                      <option value="Software Engineering">Software Engineering</option>
+                    </select>
+                    <div class="invalid-feedback">Please select your specialization.</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" placeholder="Street address, City" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label for="postalCode" class="form-label">Postal code</label>
+                    <input type="text" class="form-control" id="postalCode" placeholder="12345" maxlength="5" pattern="[0-9]{5}" required />
+                    <div class="invalid-feedback">Postal code must be exactly 5 digits.</div>
+                  </div>
                   <div class="col-md-6">
                     <label for="createPassword" class="form-label">Password</label>
                     <div class="input-group">

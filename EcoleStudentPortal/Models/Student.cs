@@ -21,8 +21,8 @@ namespace EcoleStudentPortal.Models
         public decimal? AverageGrade { get; set; }
 
         [ForeignKey("Programme")]
-        public Guid ProgrammeId { get; set; }
-        public virtual Programme Programme { get; set; } = default!;
+        public Guid? ProgrammeId { get; set; }
+        public virtual Programme? Programme { get; set; }
 
         // M:N with Course via Grade
         public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();

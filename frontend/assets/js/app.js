@@ -14,6 +14,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (registerForm) {
     const passwordInput = document.getElementById("createPassword");
     const confirmInput = document.getElementById("confirmPassword");
+    const postalCodeInput = document.getElementById("postalCode");
+    const userRoleSelect = document.getElementById("userRole");
+    const specializationField = document.getElementById("specializationField");
+    const specializationInput = document.getElementById("specialization");
+
+    // Handle role selection - show/hide specialization field
+    userRoleSelect?.addEventListener("change", (e) => {
+      const selectedRole = e.target.value;
+      if (selectedRole === "Professor") {
+        specializationField.style.display = "block";
+        specializationInput.setAttribute("required", "required");
+      } else {
+        specializationField.style.display = "none";
+        specializationInput.removeAttribute("required");
+        specializationInput.value = "";
+        specializationInput.selectedIndex = 0;
+        specializationInput.classList.remove("is-invalid");
+      }
+    });
 
     const validatePasswordStrength = () => {
       if (!passwordInput) return true;
@@ -46,11 +65,52 @@ document.addEventListener("DOMContentLoaded", () => {
       return match;
     };
 
+    const validatePostalCode = () => {
+      if (!postalCodeInput) return true;
+      const value = postalCodeInput.value.trim();
+      // Postal code is now required and must be exactly 5 digits
+      const isValid = /^[0-9]{5}$/.test(value);
+      if (!isValid) {
+        postalCodeInput.classList.add("is-invalid");
+        postalCodeInput.setCustomValidity("Postal code must be exactly 5 digits.");
+      } else {
+        postalCodeInput.classList.remove("is-invalid");
+        postalCodeInput.setCustomValidity("");
+      }
+      return isValid;
+    };
+
+    const validateSpecialization = () => {
+      if (!specializationInput) return true;
+      const selectedRole = userRoleSelect?.value;
+      // Specialization is only required for Professors
+      if (selectedRole === "Professor") {
+        const value = specializationInput.value;
+        if (value === "" || value === null) {
+          specializationInput.classList.add("is-invalid");
+          specializationInput.setCustomValidity("Please select your specialization.");
+          return false;
+        } else {
+          specializationInput.classList.remove("is-invalid");
+          specializationInput.setCustomValidity("");
+          return true;
+        }
+      }
+      return true;
+    };
+
     passwordInput?.addEventListener("input", () => {
       validatePasswordStrength();
       validatePasswords();
     });
     confirmInput?.addEventListener("input", validatePasswords);
+    postalCodeInput?.addEventListener("input", (e) => {
+      // Only allow digits
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      validatePostalCode();
+    });
+    postalCodeInput?.addEventListener("blur", validatePostalCode);
+    specializationInput?.addEventListener("change", validateSpecialization);
 
     // Registration form submission
     registerForm.addEventListener("submit", async (e) => {
@@ -59,7 +119,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const strong = validatePasswordStrength();
       const match = validatePasswords();
-      const ok = strong && match;
+      const validPostalCode = validatePostalCode();
+      const validSpecialization = validateSpecialization();
+      const ok = strong && match && validPostalCode && validSpecialization;
       
       if (!ok || !registerForm.checkValidity()) {
         registerForm.classList.add("was-validated");
@@ -71,6 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const email = document.getElementById("userEmail").value;
       const password = document.getElementById("createPassword").value;
       const userRole = document.getElementById("userRole").value;
+      const address = document.getElementById("address").value.trim();
+      const postalCode = document.getElementById("postalCode").value.trim();
+      const specialization = userRole === "Professor" ? document.getElementById("specialization").value : null;
       const submitButton = registerForm.querySelector('button[type="submit"]');
       const cardBody = registerForm.closest('.card-body');
 
@@ -90,13 +155,12 @@ document.addEventListener("DOMContentLoaded", () => {
           email: email,
           password: password,
           userType: userRole,
-          address: null,
-          postalCode: null,
+          address: address,
+          postalCode: postalCode,
           year: null,
           programmeId: null,
-          specialization: null,
-          departmentId: null,
-          roleTitle: null
+          specialization: specialization,
+          departmentId: null
         };
 
         const response = await api.register(registerData);

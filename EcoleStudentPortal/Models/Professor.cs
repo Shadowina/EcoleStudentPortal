@@ -17,8 +17,8 @@ namespace EcoleStudentPortal.Models
         public string? Specialization { get; set; }
 
         [ForeignKey("Department")]
-        public Guid DepartmentId { get; set; }
-        public virtual Department Department { get; set; } = default!;
+        public Guid? DepartmentId { get; set; }
+        public virtual Department? Department { get; set; }
 
         // M:N with Course via ProfessorCourse
         public virtual ICollection<ProfessorCourse> ProfessorCourses { get; set; } = new List<ProfessorCourse>();

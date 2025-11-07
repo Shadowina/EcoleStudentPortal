@@ -167,6 +167,10 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
         {
+            // Validate user type - only Student and Professor can register
+            if (request.UserType != "Student" && request.UserType != "Professor")
+                return BadRequest(new { message = "Only Students and Professors can register through this endpoint." });
+
             // Check if user already exists
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
                 return BadRequest(new { message = "User with this email already exists" });
@@ -197,7 +201,7 @@ namespace EcoleStudentPortal.Controllers
                     Id = Guid.NewGuid(),
                     UserId = user.Id,
                     Year = request.Year ?? 1,
-                    ProgrammeId = request.ProgrammeId ?? Guid.Empty
+                    ProgrammeId = request.ProgrammeId
                 };
                 _context.Students.Add(student);
             }
@@ -208,19 +212,9 @@ namespace EcoleStudentPortal.Controllers
                     Id = Guid.NewGuid(),
                     UserId = user.Id,
                     Specialization = request.Specialization,
-                    DepartmentId = request.DepartmentId ?? Guid.Empty
+                    DepartmentId = request.DepartmentId
                 };
                 _context.Professors.Add(professor);
-            }
-            else if (request.UserType == "DepartmentAdmin")
-            {
-                var admin = new DepartmentAdmin
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = user.Id,
-                    RoleTitle = request.RoleTitle
-                };
-                _context.DepartmentAdmins.Add(admin);
             }
 
             await _context.SaveChangesAsync();
@@ -322,8 +316,5 @@ namespace EcoleStudentPortal.Controllers
         // Professor specific
         public string? Specialization { get; set; }
         public Guid? DepartmentId { get; set; }
-        
-        // DepartmentAdmin specific
-        public string? RoleTitle { get; set; }
     }
 }
