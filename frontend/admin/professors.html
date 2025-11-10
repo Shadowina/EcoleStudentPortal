@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Professors · Ecole Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link href="../assets/css/styles.css" rel="stylesheet" />
+  <link href="../assets/css/layout.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-header">
+        <div class="user-avatar"></div>
+        <div class="user-info">
+          <div class="user-role">DEPARTMENT ADMIN</div>
+          <div class="user-name">Loading...</div>
+        </div>
+        <button class="sidebar-toggle" aria-label="Toggle sidebar">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      </div>
+
+
+      <nav class="sidebar-nav">
+
+        <div class="nav-section">
+          <div class="nav-section-label">Main</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="dashboard.html" class="nav-link" data-tooltip="Home">
+                <i class="bi bi-house nav-icon"></i>
+                <span class="nav-text">Home</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="departments.html" class="nav-link" data-tooltip="Departments">
+                <i class="bi bi-building nav-icon"></i>
+                <span class="nav-text">Departments</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="programmes.html" class="nav-link" data-tooltip="Programmes">
+                <i class="bi bi-journal-text nav-icon"></i>
+                <span class="nav-text">Programmes</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="courses.html" class="nav-link" data-tooltip="Courses">
+                <i class="bi bi-book nav-icon"></i>
+                <span class="nav-text">Courses</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="professors.html" class="nav-link active" data-tooltip="Professors">
+                <i class="bi bi-people nav-icon"></i>
+                <span class="nav-text">Professors</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="students.html" class="nav-link" data-tooltip="Students">
+                <i class="bi bi-person-badge nav-icon"></i>
+                <span class="nav-text">Students</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="course-schedules.html" class="nav-link" data-tooltip="Course Schedules">
+                <i class="bi bi-calendar-event nav-icon"></i>
+                <span class="nav-text">Course Schedules</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+
+        <div class="nav-section">
+          <div class="nav-section-label">Settings</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="settings.html" class="nav-link" data-tooltip="Settings">
+                <i class="bi bi-gear nav-icon"></i>
+                <span class="nav-text">Settings</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+
+      <div class="sidebar-footer">
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="help.html" class="nav-link" data-tooltip="Help">
+              <i class="bi bi-question-circle nav-icon"></i>
+              <span class="nav-text">Help</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link logout" data-tooltip="Logout">
+              <i class="bi bi-box-arrow-right nav-icon"></i>
+              <span class="nav-text">Logout Account</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+
+    <main class="main-content">
+
+      <header class="content-header">
+        <h1 class="content-title">Professors</h1>
+        <div class="header-actions">
+          <div class="alert alert-info mb-0 py-2 px-3">
+            <small><i class="bi bi-info-circle me-1"></i>Professors are created through the registration system.</small>
+          </div>
+        </div>
+      </header>
+
+
+      <div class="content-body">
+
+        <div id="alertContainer"></div>
+
+
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Courses</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="professorsTableBody">
+                  <tr>
+                    <td colspan="6" class="text-center">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+
+  <div class="modal fade" id="professorModal" tabindex="-1" aria-labelledby="professorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="professorModalLabel">Edit Professor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="professorForm">
+          <div class="modal-body">
+            <input type="hidden" id="professorId" />
+            <input type="hidden" id="professorUserId" />
+            
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control" id="professorName" disabled readonly />
+              <small class="form-text text-muted">Name cannot be changed. Update through user profile.</small>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" id="professorEmail" disabled readonly />
+              <small class="form-text text-muted">Email cannot be changed. Update through user profile.</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="professorSpecialization" class="form-label">Specialization</label>
+              <input type="text" class="form-control" id="professorSpecialization" />
+              <small class="form-text text-muted">Enter the professor's area of specialization.</small>
+            </div>
+            
+            <div class="mb-3">
+              <label for="professorDepartmentId" class="form-label">Department</label>
+              <select class="form-select" id="professorDepartmentId">
+                <option value="">No Department</option>
+              </select>
+              <small class="form-text text-muted">Assign professor to a department (optional).</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="professorSubmitBtn">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this professor?</p>
+          <p class="text-danger mb-0"><strong>Warning:</strong> This action cannot be undone. If this professor has courses assigned, the deletion will fail.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="professorCoursesModal" tabindex="-1" aria-labelledby="professorCoursesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="professorCoursesModalLabel">Manage Professor Courses</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="professorCoursesAlert"></div>
+          <p class="mb-3">
+            Assign courses to <strong id="professorCoursesProfessorName">Professor</strong>.
+          </p>
+          <div class="row g-2 align-items-center mb-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="professorCoursesSearch" placeholder="Search courses..." />
+              </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <span class="badge bg-primary" id="professorCoursesCount">0 selected</span>
+            </div>
+          </div>
+          <div id="professorCoursesList" class="list-group professor-courses-list"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="professorCoursesSaveBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script src="../assets/js/professors.js"></script>
+</body>
+
+</html>
+

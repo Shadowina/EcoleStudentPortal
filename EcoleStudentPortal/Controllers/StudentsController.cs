@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -27,14 +28,20 @@ namespace EcoleStudentPortal.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+            return await _context.Students
+                .Include(s => s.User)
+                .Include(s => s.Programme)
+                .ToListAsync();
         }
 
         // GET: api/Students/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(Guid id)
         {
-            var student = await _context.Students.FindAsync(id);
+            var student = await _context.Students
+                .Include(s => s.User)
+                .Include(s => s.Programme)
+                .FirstOrDefaultAsync(s => s.Id == id);
 
             if (student == null)
             {
@@ -47,14 +54,50 @@ namespace EcoleStudentPortal.Controllers
         // PUT: api/Students/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutStudent(Guid id, Student student)
+        public async Task<IActionResult> PutStudent(Guid id, StudentRequest request)
         {
-            if (id != student.Id)
+            // Get the existing student from the database
+            var existingStudent = await _context.Students.FindAsync(id);
+            if (existingStudent == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(student).State = EntityState.Modified;
+            // Validate that User exists (if UserId is being changed, which shouldn't happen)
+            if (request.UserId != existingStudent.UserId)
+            {
+                return BadRequest(new { message = "Cannot change UserId. User must remain the same." });
+            }
+
+            // Validate Programme if provided
+            if (request.ProgrammeId.HasValue)
+            {
+                var programmeExists = await _context.Programmes.AnyAsync(p => p.Id == request.ProgrammeId.Value);
+                if (!programmeExists)
+                {
+                    return BadRequest(new { message = "Programme not found." });
+                }
+            }
+
+            // Validate Year
+            if (request.Year < 1 || request.Year > 10)
+            {
+                return BadRequest(new { message = "Year must be between 1 and 10." });
+            }
+
+            // Update only allowed properties (Year, ProgrammeId, AverageGrade)
+            existingStudent.Year = request.Year;
+            existingStudent.ProgrammeId = request.ProgrammeId;
+            existingStudent.AverageGrade = request.AverageGrade;
+
+            if (request.ProgrammeId.HasValue)
+            {
+                existingStudent.Programme = await _context.Programmes.FindAsync(request.ProgrammeId.Value);
+            }
+            else
+            {
+                existingStudent.Programme = null;
+            }
 
             try
             {
@@ -75,16 +118,6 @@ namespace EcoleStudentPortal.Controllers
             return NoContent();
         }
 
-        // POST: api/Students
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student student)
-        {
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetStudent", new { id = student.Id }, student);
-        }
 
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
@@ -94,6 +127,13 @@ namespace EcoleStudentPortal.Controllers
             if (student == null)
             {
                 return NotFound();
+            }
+
+            // Check if student has grades
+            var hasGrades = await _context.Grades.AnyAsync(g => g.StudentId == id);
+            if (hasGrades)
+            {
+                return BadRequest(new { message = "Cannot delete student. They have grades assigned. Please remove grades first." });
             }
 
             _context.Students.Remove(student);
@@ -106,5 +146,17 @@ namespace EcoleStudentPortal.Controllers
         {
             return _context.Students.Any(e => e.Id == id);
         }
+    }
+
+    // Student request
+    public class StudentRequest
+    {
+        [Required]
+        public Guid UserId { get; set; }
+        [Required]
+        [Range(1, 10)]
+        public int Year { get; set; }
+        public decimal? AverageGrade { get; set; }
+        public Guid? ProgrammeId { get; set; }
     }
 }

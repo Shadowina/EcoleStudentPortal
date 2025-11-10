@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProgrammeCoursesController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -28,81 +31,68 @@ namespace EcoleStudentPortal.Controllers
             return await _context.ProgrammeCourses.ToListAsync();
         }
 
-        // GET: api/ProgrammeCourses/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProgrammeCourse>> GetProgrammeCourse(Guid id)
+        // GET: api/ProgrammeCourses/programme/{programmeId}
+        [HttpGet("programme/{programmeId}")]
+        public async Task<ActionResult<IEnumerable<ProgrammeCourse>>> GetProgrammeCoursesForProgramme(Guid programmeId)
         {
-            var programmeCourse = await _context.ProgrammeCourses.FindAsync(id);
+            var programmeCourses = await _context.ProgrammeCourses
+                .Where(pc => pc.ProgrammeId == programmeId)
+                .ToListAsync();
 
-            if (programmeCourse == null)
+            if (!programmeCourses.Any())
             {
-                return NotFound();
+                return new List<ProgrammeCourse>();
             }
 
-            return programmeCourse;
-        }
-
-        // PUT: api/ProgrammeCourses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProgrammeCourse(Guid id, ProgrammeCourse programmeCourse)
-        {
-            if (id != programmeCourse.ProgrammeId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(programmeCourse).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProgrammeCourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return programmeCourses;
         }
 
         // POST: api/ProgrammeCourses
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ProgrammeCourse>> PostProgrammeCourse(ProgrammeCourse programmeCourse)
+        public async Task<ActionResult<ProgrammeCourse>> PostProgrammeCourse(ProgrammeCourseRequest request)
         {
-            _context.ProgrammeCourses.Add(programmeCourse);
-            try
+            // Validate that Programme and Course exist
+            var programmeExists = await _context.Programmes.AnyAsync(p => p.Id == request.ProgrammeId);
+            if (!programmeExists)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ProgrammeCourseExists(programmeCourse.ProgrammeId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(new { message = "Programme not found." });
             }
 
-            return CreatedAtAction("GetProgrammeCourse", new { id = programmeCourse.ProgrammeId }, programmeCourse);
+            var courseExists = await _context.Courses.AnyAsync(c => c.Id == request.CourseId);
+            if (!courseExists)
+            {
+                return BadRequest(new { message = "Course not found." });
+            }
+
+            // Check if the relationship already exists
+            var exists = await _context.ProgrammeCourses.AnyAsync(pc =>
+                pc.ProgrammeId == request.ProgrammeId &&
+                pc.CourseId == request.CourseId);
+
+            if (exists)
+            {
+                return Conflict(new { message = "This course is already assigned to the programme." });
+            }
+
+            var programmeCourse = new ProgrammeCourse
+            {
+                ProgrammeId = request.ProgrammeId,
+                CourseId = request.CourseId
+            };
+
+            _context.ProgrammeCourses.Add(programmeCourse);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetProgrammeCoursesForProgramme), new { programmeId = programmeCourse.ProgrammeId }, programmeCourse);
         }
 
-        // DELETE: api/ProgrammeCourses/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProgrammeCourse(Guid id)
+        // DELETE: api/ProgrammeCourses/{programmeId}/{courseId}
+        [HttpDelete("{programmeId}/{courseId}")]
+        public async Task<IActionResult> DeleteProgrammeCourse(Guid programmeId, Guid courseId)
         {
-            var programmeCourse = await _context.ProgrammeCourses.FindAsync(id);
+            var programmeCourse = await _context.ProgrammeCourses
+                .FirstOrDefaultAsync(pc => pc.ProgrammeId == programmeId && pc.CourseId == courseId);
             if (programmeCourse == null)
             {
                 return NotFound();
@@ -114,9 +104,13 @@ namespace EcoleStudentPortal.Controllers
             return NoContent();
         }
 
-        private bool ProgrammeCourseExists(Guid id)
+        public class ProgrammeCourseRequest
         {
-            return _context.ProgrammeCourses.Any(e => e.ProgrammeId == id);
+            [Required]
+            public Guid ProgrammeId { get; set; }
+            [Required]
+            public Guid CourseId { get; set; }
         }
+
     }
 }

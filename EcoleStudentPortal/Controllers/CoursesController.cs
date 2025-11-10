@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CoursesController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -47,12 +49,17 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCourse(Guid id, Course course)
         {
-            if (id != course.Id)
+            // Get the existing course from the database
+            var existingCourse = await _context.Courses.FindAsync(id);
+            if (existingCourse == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(course).State = EntityState.Modified;
+            existingCourse.CourseName = course.CourseName;
+            existingCourse.Description = course.Description;
+            existingCourse.CreditWeight = course.CreditWeight;
+            existingCourse.CourseContent = course.CourseContent;
 
             try
             {
@@ -78,6 +85,12 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
+            // Generate ID if not provided or empty
+            if (course.Id == Guid.Empty)
+            {
+                course.Id = Guid.NewGuid();
+            }
+
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
 
@@ -92,6 +105,34 @@ namespace EcoleStudentPortal.Controllers
             if (course == null)
             {
                 return NotFound();
+            }
+
+            // Check if course has schedules
+            var hasSchedules = await _context.CourseSchedules.AnyAsync(cs => cs.CourseId == id);
+            if (hasSchedules)
+            {
+                return BadRequest(new { message = "Cannot delete course. It has schedules assigned. Please remove schedules first." });
+            }
+
+            // Check if course has grades
+            var hasGrades = await _context.Grades.AnyAsync(g => g.CourseId == id);
+            if (hasGrades)
+            {
+                return BadRequest(new { message = "Cannot delete course. It has grades assigned. Please remove grades first." });
+            }
+
+            // Check if course is assigned to professors
+            var hasProfessorCourses = await _context.ProfessorCourses.AnyAsync(pc => pc.CourseId == id);
+            if (hasProfessorCourses)
+            {
+                return BadRequest(new { message = "Cannot delete course. It is assigned to professors. Please remove professor assignments first." });
+            }
+
+            // Check if course is assigned to programmes
+            var hasProgrammeCourses = await _context.ProgrammeCourses.AnyAsync(pc => pc.CourseId == id);
+            if (hasProgrammeCourses)
+            {
+                return BadRequest(new { message = "Cannot delete course. It is assigned to programmes. Please remove programme assignments first." });
             }
 
             _context.Courses.Remove(course);

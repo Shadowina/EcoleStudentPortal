@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -47,14 +48,26 @@ namespace EcoleStudentPortal.Controllers
         // PUT: api/Departments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepartment(Guid id, Department department)
+        public async Task<IActionResult> PutDepartment(Guid id, DepartmentRequest request)
         {
-            if (id != department.Id)
+            // Validate that DepartmentAdmin exists
+            var departmentAdmin = await _context.DepartmentAdmins.FindAsync(request.DepartmentAdminId);
+            if (departmentAdmin == null)
             {
-                return BadRequest();
+                return BadRequest(new { message = "DepartmentAdmin not found." });
             }
 
-            _context.Entry(department).State = EntityState.Modified;
+            // Get the existing department from the database
+            var existingDepartment = await _context.Departments.FindAsync(id);
+            if (existingDepartment == null)
+            {
+                return NotFound();
+            }
+
+            existingDepartment.DepartmentName = request.DepartmentName;
+            existingDepartment.Description = request.Description;
+            existingDepartment.DepartmentAdminId = request.DepartmentAdminId;
+            existingDepartment.DepartmentAdmin = departmentAdmin;
 
             try
             {
@@ -78,8 +91,25 @@ namespace EcoleStudentPortal.Controllers
         // POST: api/Departments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Department>> PostDepartment(Department department)
+        public async Task<ActionResult<Department>> PostDepartment(DepartmentRequest request)
         {
+            // Validate that DepartmentAdmin exists
+            var departmentAdmin = await _context.DepartmentAdmins.FindAsync(request.DepartmentAdminId);
+            if (departmentAdmin == null)
+            {
+                return BadRequest(new { message = "DepartmentAdmin not found." });
+            }
+
+            // Create new department entity
+            var department = new Department
+            {
+                Id = Guid.NewGuid(),
+                DepartmentName = request.DepartmentName,
+                Description = request.Description,
+                DepartmentAdminId = request.DepartmentAdminId,
+                DepartmentAdmin = departmentAdmin
+            };
+
             _context.Departments.Add(department);
             await _context.SaveChangesAsync();
 
@@ -106,5 +136,15 @@ namespace EcoleStudentPortal.Controllers
         {
             return _context.Departments.Any(e => e.Id == id);
         }
+    }
+
+    // Department request
+    public class DepartmentRequest
+    {
+        [Required]
+        public string DepartmentName { get; set; } = default!;
+        public string? Description { get; set; }
+        [Required]
+        public Guid DepartmentAdminId { get; set; }
     }
 }

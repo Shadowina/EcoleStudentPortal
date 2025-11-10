@@ -1,4 +1,3 @@
-// Shared Layout JavaScript
 document.addEventListener("DOMContentLoaded", () => {
   // Sidebar Toggle Functionality
   const sidebar = document.querySelector('.sidebar');
@@ -40,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Set active nav item based on current page
+  // Set active nav item based on current page and check authentication
   const currentPath = window.location.pathname;
   const navLinks = document.querySelectorAll('.nav-link');
   
@@ -51,16 +50,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Check authentication
-  const userData = auth.getUserData();
-  const token = auth.getToken();
+  // Check authentication and authorization based on page
+  const isAdminPage = currentPath.includes('/admin/');
+  const isProfessorPage = currentPath.includes('/professor/');
+  const isStudentPage = currentPath.includes('/student/');
+  const isAuthPage = currentPath.includes('login.html') || currentPath.includes('register.html');
 
-  if (!token || !userData) {
-    // Redirect to login if not authenticated
-    if (!window.location.pathname.includes('login.html') && !window.location.pathname.includes('register.html')) {
-      window.location.href = 'login.html';
+  // If on an admin page, require DepartmentAdmin user type
+  if (isAdminPage) {
+    if (!auth.requireUserType('DepartmentAdmin')) {
+      return; // Redirect will happen in requireUserType
     }
-  } else {
+  }
+  // If on a professor page, require Professor user type
+  else if (isProfessorPage) {
+    if (!auth.requireUserType('Professor')) {
+      return; // Redirect will happen in requireUserType
+    }
+  }
+  // If on a student page, require Student user type
+  else if (isStudentPage) {
+    if (!auth.requireUserType('Student')) {
+      return; // Redirect will happen in requireUserType
+    }
+  }
+  // If on a protected page (not auth page), require authentication
+  else if (!isAuthPage) {
+    if (!auth.requireAuth()) {
+      return; // Redirect will happen in requireAuth
+    }
+  }
+
+  // If authenticated, update UI
+  const userData = auth.getUserData();
+  if (userData && !isAuthPage) {
     // Update user info in sidebar
     updateUserInfo(userData);
     

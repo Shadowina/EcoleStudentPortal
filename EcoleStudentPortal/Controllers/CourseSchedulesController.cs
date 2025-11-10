@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CourseSchedulesController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -25,14 +28,18 @@ namespace EcoleStudentPortal.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CourseSchedule>>> GetCourseSchedules()
         {
-            return await _context.CourseSchedules.ToListAsync();
+            return await _context.CourseSchedules
+                .Include(cs => cs.Course)
+                .ToListAsync();
         }
 
         // GET: api/CourseSchedules/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CourseSchedule>> GetCourseSchedule(Guid id)
         {
-            var courseSchedule = await _context.CourseSchedules.FindAsync(id);
+            var courseSchedule = await _context.CourseSchedules
+                .Include(cs => cs.Course)
+                .FirstOrDefaultAsync(cs => cs.Id == id);
 
             if (courseSchedule == null)
             {
@@ -45,14 +52,39 @@ namespace EcoleStudentPortal.Controllers
         // PUT: api/CourseSchedules/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCourseSchedule(Guid id, CourseSchedule courseSchedule)
+        public async Task<IActionResult> PutCourseSchedule(Guid id, CourseScheduleRequest request)
         {
-            if (id != courseSchedule.Id)
+            // Get the existing course schedule from the database
+            var existingSchedule = await _context.CourseSchedules.FindAsync(id);
+            if (existingSchedule == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(courseSchedule).State = EntityState.Modified;
+            // Validate that Course exists
+            var courseExists = await _context.Courses.AnyAsync(c => c.Id == request.CourseId);
+            if (!courseExists)
+            {
+                return BadRequest(new { message = "Course not found." });
+            }
+
+            // Validate that end time is after start time
+            if (request.EndTime <= request.StartTime)
+            {
+                return BadRequest(new { message = "End time must be after start time." });
+            }
+
+            existingSchedule.CourseId = request.CourseId;
+            existingSchedule.Location = request.Location;
+            existingSchedule.Date = request.Date;
+            existingSchedule.StartTime = request.StartTime;
+            existingSchedule.EndTime = request.EndTime;
+
+            var course = await _context.Courses.FindAsync(request.CourseId);
+            if (course != null)
+            {
+                existingSchedule.Course = course;
+            }
 
             try
             {
@@ -76,8 +108,39 @@ namespace EcoleStudentPortal.Controllers
         // POST: api/CourseSchedules
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<CourseSchedule>> PostCourseSchedule(CourseSchedule courseSchedule)
+        public async Task<ActionResult<CourseSchedule>> PostCourseSchedule(CourseScheduleRequest request)
         {
+            // Validate that Course exists
+            var courseExists = await _context.Courses.AnyAsync(c => c.Id == request.CourseId);
+            if (!courseExists)
+            {
+                return BadRequest(new { message = "Course not found." });
+            }
+
+            // Validate that end time is after start time
+            if (request.EndTime <= request.StartTime)
+            {
+                return BadRequest(new { message = "End time must be after start time." });
+            }
+
+            // Generate ID if not provided
+            var course = await _context.Courses.FindAsync(request.CourseId);
+            if (course == null)
+            {
+                return BadRequest(new { message = "Course not found." });
+            }
+
+            var courseSchedule = new CourseSchedule
+            {
+                Id = Guid.NewGuid(),
+                CourseId = request.CourseId,
+                Location = request.Location,
+                Date = request.Date,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                Course = course
+            };
+
             _context.CourseSchedules.Add(courseSchedule);
             await _context.SaveChangesAsync();
 
@@ -104,5 +167,20 @@ namespace EcoleStudentPortal.Controllers
         {
             return _context.CourseSchedules.Any(e => e.Id == id);
         }
+    }
+
+    // CourseSchedule request
+    public class CourseScheduleRequest
+    {
+        [Required]
+        public Guid CourseId { get; set; }
+        [Required]
+        public string Location { get; set; } = default!;
+        [Required]
+        public DateOnly Date { get; set; }
+        [Required]
+        public TimeOnly StartTime { get; set; }
+        [Required]
+        public TimeOnly EndTime { get; set; }
     }
 }

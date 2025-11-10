@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProgrammesController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -45,14 +48,33 @@ namespace EcoleStudentPortal.Controllers
         // PUT: api/Programmes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProgramme(Guid id, Programme programme)
+        public async Task<IActionResult> PutProgramme(Guid id, ProgrammeRequest request)
         {
-            if (id != programme.Id)
+            // Validate that Department exists
+            var department = await _context.Departments.FindAsync(request.DepartmentId);
+            if (department == null)
             {
-                return BadRequest();
+                return BadRequest(new { message = "Department not found." });
             }
 
-            _context.Entry(programme).State = EntityState.Modified;
+            // Get the existing programme from the database
+            var existingProgramme = await _context.Programmes.FindAsync(id);
+            if (existingProgramme == null)
+            {
+                return NotFound();
+            }
+
+            // Validate session dates
+            if (request.SessionEnd <= request.SessionStart)
+            {
+                return BadRequest(new { message = "Session end date must be after session start date." });
+            }
+
+            existingProgramme.ProgrammeName = request.ProgrammeName;
+            existingProgramme.SessionStart = request.SessionStart;
+            existingProgramme.SessionEnd = request.SessionEnd;
+            existingProgramme.DepartmentId = request.DepartmentId;
+            existingProgramme.Department = department;
 
             try
             {
@@ -76,8 +98,32 @@ namespace EcoleStudentPortal.Controllers
         // POST: api/Programmes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Programme>> PostProgramme(Programme programme)
+        public async Task<ActionResult<Programme>> PostProgramme(ProgrammeRequest request)
         {
+            // Validate that Department exists
+            var department = await _context.Departments.FindAsync(request.DepartmentId);
+            if (department == null)
+            {
+                return BadRequest(new { message = "Department not found." });
+            }
+
+            // Validate session dates
+            if (request.SessionEnd <= request.SessionStart)
+            {
+                return BadRequest(new { message = "Session end date must be after session start date." });
+            }
+
+            // Create new programme entity
+            var programme = new Programme
+            {
+                Id = Guid.NewGuid(),
+                ProgrammeName = request.ProgrammeName,
+                SessionStart = request.SessionStart,
+                SessionEnd = request.SessionEnd,
+                DepartmentId = request.DepartmentId,
+                Department = department
+            };
+
             _context.Programmes.Add(programme);
             await _context.SaveChangesAsync();
 
@@ -104,5 +150,18 @@ namespace EcoleStudentPortal.Controllers
         {
             return _context.Programmes.Any(e => e.Id == id);
         }
+    }
+
+    // Programme request
+    public class ProgrammeRequest
+    {
+        [Required]
+        public string ProgrammeName { get; set; } = default!;
+        [Required]
+        public DateOnly SessionStart { get; set; }
+        [Required]
+        public DateOnly SessionEnd { get; set; }
+        [Required]
+        public Guid DepartmentId { get; set; }
     }
 }
