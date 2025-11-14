@@ -14,7 +14,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Requires authentication
+    [Authorize]
     public class StudentsController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -56,20 +56,17 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutStudent(Guid id, StudentRequest request)
         {
-            // Get the existing student from the database
             var existingStudent = await _context.Students.FindAsync(id);
             if (existingStudent == null)
             {
                 return NotFound();
             }
 
-            // Validate that User exists (if UserId is being changed, which shouldn't happen)
             if (request.UserId != existingStudent.UserId)
             {
                 return BadRequest(new { message = "Cannot change UserId. User must remain the same." });
             }
 
-            // Validate Programme if provided
             if (request.ProgrammeId.HasValue)
             {
                 var programmeExists = await _context.Programmes.AnyAsync(p => p.Id == request.ProgrammeId.Value);
@@ -79,13 +76,11 @@ namespace EcoleStudentPortal.Controllers
                 }
             }
 
-            // Validate Year
             if (request.Year < 1 || request.Year > 10)
             {
                 return BadRequest(new { message = "Year must be between 1 and 10." });
             }
 
-            // Update only allowed properties (Year, ProgrammeId, AverageGrade)
             existingStudent.Year = request.Year;
             existingStudent.ProgrammeId = request.ProgrammeId;
             existingStudent.AverageGrade = request.AverageGrade;
@@ -129,7 +124,6 @@ namespace EcoleStudentPortal.Controllers
                 return NotFound();
             }
 
-            // Check if student has grades
             var hasGrades = await _context.Grades.AnyAsync(g => g.StudentId == id);
             if (hasGrades)
             {

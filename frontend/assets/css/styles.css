@@ -161,12 +161,79 @@ body {
   backdrop-filter: blur(16px);
 }
 
-/* Ensure side-by-side buttons have equal widths */
 .btn-equal-group {
   display: flex;
 }
 .btn-equal-group .btn {
   flex: 1 1 0;
+}
+
+.btn i {
+  margin-right: 0.6rem;
+}
+
+.detail-section-title {
+  color: var(--ecole-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(11, 79, 108, 0.1);
+}
+
+.detail-item {
+  padding: 0.5rem 0;
+}
+
+.detail-item strong {
+  color: var(--ecole-dark);
+}
+
+.sub-item-section-title {
+  color: var(--ecole-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(11, 79, 108, 0.1);
+}
+
+.sub-item-section .table {
+  margin-bottom: 0;
+}
+
+.sub-item-section .table thead th {
+  background-color: rgba(11, 79, 108, 0.05);
+  color: var(--ecole-primary);
+  font-weight: 600;
+  border-bottom: 2px solid rgba(11, 79, 108, 0.1);
+}
+
+.sub-item-section .table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.sub-item-section .table tbody tr:hover {
+  background-color: rgba(11, 79, 108, 0.03);
+}
+
+/* Make table rows clickable */
+.table tbody tr[data-clickable="true"] {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr[data-clickable="true"]:hover {
+  background-color: rgba(11, 79, 108, 0.08);
+}
+
+/* Prevent action buttons from triggering row click */
+.table tbody tr td:last-child,
+.table tbody tr td .btn {
+  cursor: default;
+}
+
+.table tbody tr td .btn {
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 576px) {

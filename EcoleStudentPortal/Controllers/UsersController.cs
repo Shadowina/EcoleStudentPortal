@@ -113,12 +113,10 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponse>> Login(LoginRequest request)
         {
-            // Find user by email
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null || !VerifyPassword(request.Password, user.Password))
                 return Unauthorized(new { message = "Invalid email or password" });
 
-            // Determine user type and get profile
             string userType = "";
             Guid? profileId = null;
 
@@ -147,7 +145,6 @@ namespace EcoleStudentPortal.Controllers
                 }
             }
 
-            // Generate JWT token
             var token = GenerateJwtToken(user, userType, profileId);
 
             return new AuthResponse
@@ -167,18 +164,14 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
         {
-            // Validate user type - only Student and Professor can register
             if (request.UserType != "Student" && request.UserType != "Professor")
                 return BadRequest(new { message = "Only Students and Professors can register through this endpoint." });
 
-            // Check if user already exists
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
                 return BadRequest(new { message = "User with this email already exists" });
 
-            // Generate registration number
             var registrationNumber = GenerateRegistrationNumber(request.UserType);
 
-            // Create new user
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -193,7 +186,6 @@ namespace EcoleStudentPortal.Controllers
 
             _context.Users.Add(user);
 
-            // Create profile based on user type
             if (request.UserType == "Student")
             {
                 var student = new Student
@@ -219,7 +211,6 @@ namespace EcoleStudentPortal.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Generate token for new user
             var token = GenerateJwtToken(user, request.UserType, null);
             return new AuthResponse
             {
@@ -244,7 +235,6 @@ namespace EcoleStudentPortal.Controllers
             var minute = now.Minute.ToString("D2");
             var second = now.Second.ToString("D2");
 
-            // Get user type prefix
             string prefix = userType switch
             {
                 "Student" => "STU",
@@ -253,14 +243,12 @@ namespace EcoleStudentPortal.Controllers
                 _ => "USR"
             };
 
-            // Get sequence number for today
             var today = now.Date;
             var sequenceNumber = _context.Users
                 .Where(u => u.RegistrationNumber.StartsWith(prefix) && 
                            u.RegistrationNumber.Contains(today.ToString("yyyyMMdd")))
                 .Count() + 1;
 
-            // Format: PREFIX-YYYYMMDD-HHMMSS-XXX
             return $"{prefix}-{year}{month}{day}-{hour}{minute}{second}-{sequenceNumber:D3}";
         }
 
@@ -298,7 +286,6 @@ namespace EcoleStudentPortal.Controllers
         }
     }
 
-    // Register request model
     public class RegisterRequest
     {
         public string FirstName { get; set; } = default!;

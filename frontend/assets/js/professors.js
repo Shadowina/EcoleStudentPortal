@@ -223,7 +223,7 @@ function renderProfessorsTable() {
   if (professors.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center text-muted">No professors found. Professors are created through the registration system.</td>
+        <td colspan="5" class="text-center text-muted">No professors found. Professors are created through the registration system.</td>
       </tr>
     `;
     return;
@@ -252,15 +252,14 @@ function renderProfessorsTable() {
       : '';
 
     return `
-      <tr>
+      <tr data-clickable="true" data-professor-id="${profId}">
         <td><strong>${escapeHtml(userInfo.name)}</strong></td>
         <td>${escapeHtml(userInfo.email)}</td>
         <td>${specialization ? escapeHtml(specialization) : '<span class="text-muted">No specialization</span>'}</td>
         <td>${deptInfo ? escapeHtml(deptInfo.name) : '<span class="text-muted">No department</span>'}</td>
-        <td>${courseBadge}</td>
-        <td class="text-end">
+        <td class="text-end" onclick="event.stopPropagation()">
           <button class="btn btn-sm btn-outline-secondary me-2" ${manageDisabled} ${manageTitle} onclick="openManageCoursesModal('${profId}')">
-            <i class="bi bi-link"></i> Courses
+            <i class="bi bi-link"></i> Assign Courses
           </button>
           <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('${profId}')">
             <i class="bi bi-pencil"></i> Edit
@@ -272,6 +271,83 @@ function renderProfessorsTable() {
       </tr>
     `;
   }).join('');
+  
+  setupRowClickHandlers();
+}
+
+function setupRowClickHandlers() {
+  const tbody = document.getElementById('professorsTableBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-clickable="true"]');
+  rows.forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) {
+        return;
+      }
+      const professorId = row.getAttribute('data-professor-id');
+      if (professorId) {
+        openProfessorDetailView(professorId);
+      }
+    });
+  });
+}
+
+async function openProfessorDetailView(professorId) {
+  const professor = professors.find(p => (p.id || p.Id) === professorId);
+  if (!professor) {
+    showAlert('Professor not found.', 'danger');
+    return;
+  }
+
+  const userInfo = getUserInfoFromProfessor(professor);
+  const deptInfo = getDepartmentInfoFromProfessor(professor);
+
+  let professorCourses = [];
+  let courseDetails = [];
+  try {
+    professorCourses = await api.get(`/ProfessorCourses/professor/${professorId}`);
+    
+    for (const pc of professorCourses) {
+      const courseId = pc.courseId || pc.CourseId;
+      try {
+        const course = await api.get(`/Courses/${courseId}`);
+        courseDetails.push(course);
+      } catch (error) {
+        console.error(`Error loading course ${courseId}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading professor courses:', error);
+  }
+
+  const config = {
+    title: `Professor: ${userInfo.name}`,
+    sections: [
+      {
+        title: 'Professor Information',
+        items: [
+          { label: 'Name', value: userInfo.name },
+          { label: 'Email', value: userInfo.email || 'No email' },
+          { label: 'Specialization', value: professor.specialization || professor.Specialization || 'Not specified' },
+          { label: 'Department', value: deptInfo ? deptInfo.name : 'No department assigned' }
+        ]
+      }
+    ],
+    subItems: [
+      {
+        title: 'Courses',
+        columns: ['Name', 'Description', 'Credit Weight'],
+        items: courseDetails.map(course => ({
+          Name: `<strong>${escapeHtml(course.courseName || course.CourseName)}</strong>`,
+          Description: escapeHtml(course.description || course.Description || 'No description'),
+          'Credit Weight': `${course.creditWeight || course.CreditWeight} credits`
+        }))
+      }
+    ]
+  };
+
+  detailView.show(config);
 }
 
 // Open edit modal

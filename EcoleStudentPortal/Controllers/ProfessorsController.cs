@@ -56,14 +56,12 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProfessor(Guid id, ProfessorRequest request)
         {
-            // Get the existing professor from the database
             var existingProfessor = await _context.Professors.FindAsync(id);
             if (existingProfessor == null)
             {
                 return NotFound();
             }
 
-            // Validate Department if provided
             if (request.DepartmentId.HasValue)
             {
                 var departmentExists = await _context.Departments.AnyAsync(d => d.Id == request.DepartmentId.Value);
@@ -73,7 +71,6 @@ namespace EcoleStudentPortal.Controllers
                 }
             }
 
-            // Update only allowed properties (Specialization, DepartmentId)
             existingProfessor.Specialization = request.Specialization;
             existingProfessor.DepartmentId = request.DepartmentId;
 
@@ -116,7 +113,6 @@ namespace EcoleStudentPortal.Controllers
                 return NotFound();
             }
 
-            // Check if professor has course assignments
             var hasCourseAssignments = await _context.ProfessorCourses.AnyAsync(pc => pc.ProfessorId == id);
             if (hasCourseAssignments)
             {

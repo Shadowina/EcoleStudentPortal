@@ -17,102 +17,7 @@
 <body>
   <div class="app-layout">
 
-    <aside class="sidebar" id="sidebar">
-
-      <div class="sidebar-header">
-        <div class="user-avatar"></div>
-        <div class="user-info">
-          <div class="user-role">DEPARTMENT ADMIN</div>
-          <div class="user-name">Loading...</div>
-        </div>
-        <button class="sidebar-toggle" aria-label="Toggle sidebar">
-          <i class="bi bi-chevron-left"></i>
-        </button>
-      </div>
-
-
-      <nav class="sidebar-nav">
-
-        <div class="nav-section">
-          <div class="nav-section-label">Main</div>
-          <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="dashboard.html" class="nav-link" data-tooltip="Home">
-                <i class="bi bi-house nav-icon"></i>
-                <span class="nav-text">Home</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="departments.html" class="nav-link" data-tooltip="Departments">
-                <i class="bi bi-building nav-icon"></i>
-                <span class="nav-text">Departments</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="programmes.html" class="nav-link" data-tooltip="Programmes">
-                <i class="bi bi-journal-text nav-icon"></i>
-                <span class="nav-text">Programmes</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="courses.html" class="nav-link active" data-tooltip="Courses">
-                <i class="bi bi-book nav-icon"></i>
-                <span class="nav-text">Courses</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="professors.html" class="nav-link" data-tooltip="Professors">
-                <i class="bi bi-people nav-icon"></i>
-                <span class="nav-text">Professors</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="students.html" class="nav-link" data-tooltip="Students">
-                <i class="bi bi-person-badge nav-icon"></i>
-                <span class="nav-text">Students</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="course-schedules.html" class="nav-link" data-tooltip="Course Schedules">
-                <i class="bi bi-calendar-event nav-icon"></i>
-                <span class="nav-text">Course Schedules</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-
-        <div class="nav-section">
-          <div class="nav-section-label">Settings</div>
-          <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="settings.html" class="nav-link" data-tooltip="Settings">
-                <i class="bi bi-gear nav-icon"></i>
-                <span class="nav-text">Settings</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
-
-      <div class="sidebar-footer">
-        <ul class="nav-menu">
-          <li class="nav-item">
-            <a href="help.html" class="nav-link" data-tooltip="Help">
-              <i class="bi bi-question-circle nav-icon"></i>
-              <span class="nav-text">Help</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link logout" data-tooltip="Logout">
-              <i class="bi bi-box-arrow-right nav-icon"></i>
-              <span class="nav-text">Logout Account</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </aside>
+    <div id="sidebar-container"></div>
 
 
     <main class="main-content">
@@ -225,7 +130,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/sidebar-loader.js"></script>
   <script src="../assets/js/layout.js"></script>
+  <script src="../assets/js/detail-view.js"></script>
   <script src="../assets/js/courses.js"></script>
 </body>
 

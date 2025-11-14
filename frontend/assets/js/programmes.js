@@ -184,7 +184,7 @@ function renderProgrammesTable() {
   if (programmes.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center text-muted">No programmes found. Click "Create Programme" to add one.</td>
+        <td colspan="5" class="text-center text-muted">No programmes found. Click "Create Programme" to add one.</td>
       </tr>
     `;
     return;
@@ -221,15 +221,14 @@ function renderProgrammesTable() {
       : '';
 
     return `
-      <tr>
+      <tr data-clickable="true" data-programme-id="${progId}">
         <td><strong>${escapeHtml(progName)}</strong></td>
         <td>${escapeHtml(startDate)}</td>
         <td>${escapeHtml(endDate)}</td>
         <td>${escapeHtml(deptInfo.name)}</td>
-        <td>${courseBadge}</td>
-        <td class="text-end">
+        <td class="text-end" onclick="event.stopPropagation()">
           <button class="btn btn-sm btn-outline-secondary me-2" ${manageDisabled} ${manageTitle} onclick="openManageCoursesModal('${progId}')">
-            <i class="bi bi-link"></i> Courses
+            <i class="bi bi-link"></i> Assign Courses
           </button>
           <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('${progId}')">
             <i class="bi bi-pencil"></i> Edit
@@ -241,6 +240,86 @@ function renderProgrammesTable() {
       </tr>
     `;
   }).join('');
+  
+  setupRowClickHandlers();
+}
+
+function setupRowClickHandlers() {
+  const tbody = document.getElementById('programmesTableBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-clickable="true"]');
+  rows.forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) {
+        return;
+      }
+      const programmeId = row.getAttribute('data-programme-id');
+      if (programmeId) {
+        openProgrammeDetailView(programmeId);
+      }
+    });
+  });
+}
+
+async function openProgrammeDetailView(programmeId) {
+  const programme = programmes.find(p => (p.id || p.Id) === programmeId);
+  if (!programme) {
+    showAlert('Programme not found.', 'danger');
+    return;
+  }
+
+  const deptId = programme.departmentId || programme.DepartmentId;
+  const deptInfo = departmentMap[deptId] || {
+    name: 'Unknown Department',
+    description: ''
+  };
+
+  let programmeCourses = [];
+  let courseDetails = [];
+  try {
+    programmeCourses = await api.get(`/ProgrammeCourses/programme/${programmeId}`);
+    
+    for (const pc of programmeCourses) {
+      const courseId = pc.courseId || pc.CourseId;
+      try {
+        const course = await api.get(`/Courses/${courseId}`);
+        courseDetails.push(course);
+      } catch (error) {
+        console.error(`Error loading course ${courseId}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading programme courses:', error);
+  }
+
+  const config = {
+    title: `Programme: ${programme.programmeName || programme.ProgrammeName}`,
+    sections: [
+      {
+        title: 'Programme Information',
+        items: [
+          { label: 'Name', value: programme.programmeName || programme.ProgrammeName },
+          { label: 'Session Start', value: formatDate(programme.sessionStart || programme.SessionStart) },
+          { label: 'Session End', value: formatDate(programme.sessionEnd || programme.SessionEnd) },
+          { label: 'Department', value: deptInfo.name }
+        ]
+      }
+    ],
+    subItems: [
+      {
+        title: 'Courses',
+        columns: ['Name', 'Description', 'Credit Weight'],
+        items: courseDetails.map(course => ({
+          Name: `<strong>${escapeHtml(course.courseName || course.CourseName)}</strong>`,
+          Description: escapeHtml(course.description || course.Description || 'No description'),
+          'Credit Weight': `${course.creditWeight || course.CreditWeight} credits`
+        }))
+      }
+    ]
+  };
+
+  detailView.show(config);
 }
 
 // Format date from API response (handles DateOnly and string formats)

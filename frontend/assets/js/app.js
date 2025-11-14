@@ -143,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const existingAlert = cardBody.querySelector('.alert');
       if (existingAlert) existingAlert.remove();
 
-      // Show loading state
       const originalText = submitButton.textContent;
       submitButton.disabled = true;
       submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating account...';
@@ -165,7 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const response = await api.register(registerData);
         
-        // Save auth data
         auth.saveToken(response.token);
         auth.saveUserData({
           userId: response.userId,
@@ -175,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
           userType: response.userType
         });
 
-        // Show success message
         showSuccess(`Account created successfully! Welcome, ${response.firstName}! Redirecting...`, cardBody);
 
         // Redirect to role-specific dashboard
@@ -230,7 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const existingAlert = cardBody.querySelector('.alert');
       if (existingAlert) existingAlert.remove();
 
-      // Show loading state
       const originalText = submitButton.textContent;
       submitButton.disabled = true;
       submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Signing in...';
@@ -238,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await api.login(email, password);
         
-        // Save auth data
         auth.saveToken(response.token);
         auth.saveUserData({
           userId: response.userId,
@@ -249,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
           profileId: response.profileId
         });
 
-        // Show success message
         showSuccess(`Welcome back, ${response.firstName}! Redirecting...`, cardBody);
 
         // Redirect to role-specific dashboard
@@ -266,7 +260,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Get dashboard URL based on user type
 function getDashboardUrl(userType) {
   switch (userType) {
     case 'Student':

@@ -38,12 +38,10 @@ const api = {
     return await response.json();
   },
 
-  
   async authenticatedFetch(endpoint, options = {}) {
     const token = auth.getToken();
     
     if (!token) {
-      
       auth.clearAuth();
       window.location.href = auth.getLoginUrl();
       throw new Error('Not authenticated');
@@ -60,7 +58,6 @@ const api = {
       headers
     });
 
-    
     if (response.status === 401) {
       auth.clearAuth();
       window.location.href = auth.getLoginUrl();
@@ -72,7 +69,6 @@ const api = {
       throw new Error(error.message || `Request failed with status ${response.status}`);
     }
 
-    
     if (response.status === 204) {
       return null;
     }
@@ -80,7 +76,6 @@ const api = {
     return await response.json();
   },
 
-  
   async get(endpoint) {
     return this.authenticatedFetch(endpoint, { method: 'GET' });
   },
@@ -131,26 +126,21 @@ const auth = {
     return !!this.getToken();
   },
 
-  
   isTokenExpired() {
     const token = this.getToken();
     if (!token) return true;
 
     try {
-      
       const parts = token.split('.');
       if (parts.length !== 3) return true;
 
-      
       const payload = JSON.parse(atob(parts[1]));
-      
       
       if (payload.exp) {
         const expTime = payload.exp * 1000; 
         return Date.now() >= expTime;
       }
 
-      
       return false;
     } catch (error) {
       console.error('Error checking token expiration:', error);
@@ -158,7 +148,6 @@ const auth = {
     }
   },
 
-  
   getLoginUrl() {
     const currentPath = window.location.pathname;
     if (currentPath.includes('/admin/') || currentPath.includes('/professor/') || currentPath.includes('/student/')) {
@@ -167,7 +156,6 @@ const auth = {
     return 'login.html';
   },
 
-  
   requireAuth() {
     if (!this.isAuthenticated() || this.isTokenExpired()) {
       this.clearAuth();
@@ -177,7 +165,6 @@ const auth = {
     return true;
   },
 
-  
   requireUserType(userType) {
     if (!this.requireAuth()) {
       return false;
@@ -185,7 +172,6 @@ const auth = {
 
     const userData = this.getUserData();
     if (!userData || userData.userType !== userType) {
-      
       this.clearAuth();
       window.location.href = this.getLoginUrl();
       return false;
@@ -196,7 +182,6 @@ const auth = {
 };
 
 function showError(message, container) {
-  
   const existingAlert = container.querySelector('.alert-danger');
   if (existingAlert) {
     existingAlert.remove();
@@ -209,7 +194,6 @@ function showError(message, container) {
     <strong>Error:</strong> ${message}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   `;
-  
   
   container.insertBefore(alertDiv, container.firstChild);
 }

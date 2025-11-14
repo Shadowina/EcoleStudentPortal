@@ -59,11 +59,11 @@ function renderCoursesTable() {
       : '<span class="text-muted">No description</span>';
 
     return `
-      <tr>
+      <tr data-clickable="true" data-course-id="${courseId}">
         <td><strong>${escapeHtml(courseName)}</strong></td>
         <td>${displayDescription}</td>
         <td><span class="badge bg-primary">${creditWeight} credits</span></td>
-        <td class="text-end">
+        <td class="text-end" onclick="event.stopPropagation()">
           <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('${courseId}')">
             <i class="bi bi-pencil"></i> Edit
           </button>
@@ -74,6 +74,139 @@ function renderCoursesTable() {
       </tr>
     `;
   }).join('');
+  
+  setupRowClickHandlers();
+}
+
+function setupRowClickHandlers() {
+  const tbody = document.getElementById('coursesTableBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-clickable="true"]');
+  rows.forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) {
+        return;
+      }
+      const courseId = row.getAttribute('data-course-id');
+      if (courseId) {
+        openCourseDetailView(courseId);
+      }
+    });
+  });
+}
+
+async function openCourseDetailView(courseId) {
+  const course = courses.find(c => (c.id || c.Id) === courseId);
+  if (!course) {
+    showAlert('Course not found.', 'danger');
+    return;
+  }
+
+  let programmeCourses = [];
+  let programmeDetails = [];
+  try {
+    const allProgrammeCourses = await api.get('/ProgrammeCourses');
+    programmeCourses = allProgrammeCourses.filter(pc => {
+      const pcCourseId = pc.courseId || pc.CourseId;
+      return pcCourseId === courseId;
+    });
+    
+    for (const pc of programmeCourses) {
+      const progId = pc.programmeId || pc.ProgrammeId;
+      try {
+        const programme = await api.get(`/Programmes/${progId}`);
+        programmeDetails.push(programme);
+      } catch (error) {
+        console.error(`Error loading programme ${progId}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading programme courses:', error);
+  }
+
+  let professorCourses = [];
+  let professorDetails = [];
+  try {
+    const allProfessorCourses = await api.get('/ProfessorCourses');
+    professorCourses = allProfessorCourses.filter(pc => {
+      const pcCourseId = pc.courseId || pc.CourseId;
+      return pcCourseId === courseId;
+    });
+    
+    for (const pc of professorCourses) {
+      const profId = pc.professorId || pc.ProfessorId;
+      try {
+        const professor = await api.get(`/Professors/${profId}`);
+        const userId = professor.userId || professor.UserId;
+        let userName = 'Unknown';
+        let userEmail = '';
+        try {
+          const user = await api.get(`/Users/${userId}`);
+          const firstName = user.firstName || user.FirstName || '';
+          const lastName = user.lastName || user.LastName || '';
+          userName = `${firstName} ${lastName}`.trim() || 'Unknown';
+          userEmail = user.email || user.Email || '';
+        } catch (error) {
+          console.error(`Error loading user ${userId}:`, error);
+        }
+        professorDetails.push({
+          ...professor,
+          userName,
+          userEmail
+        });
+      } catch (error) {
+        console.error(`Error loading professor ${profId}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading professor courses:', error);
+  }
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    if (typeof date === 'string') {
+      return new Date(date).toLocaleDateString();
+    }
+    return date.toLocaleDateString();
+  };
+
+  const config = {
+    title: `Course: ${course.courseName || course.CourseName}`,
+    sections: [
+      {
+        title: 'Course Information',
+        items: [
+          { label: 'Name', value: course.courseName || course.CourseName },
+          { label: 'Description', value: course.description || course.Description || 'No description' },
+          { label: 'Credit Weight', value: `${course.creditWeight || course.CreditWeight} credits` },
+          { label: 'Course Content', value: course.courseContent || course.CourseContent || 'No content specified' }
+        ]
+      }
+    ],
+    subItems: [
+      {
+        title: 'Programmes',
+        columns: ['Name', 'Session Start', 'Session End'],
+        items: programmeDetails.map(prog => ({
+          Name: `<strong>${escapeHtml(prog.programmeName || prog.ProgrammeName)}</strong>`,
+          'Session Start': formatDate(prog.sessionStart || prog.SessionStart),
+          'Session End': formatDate(prog.sessionEnd || prog.SessionEnd)
+        }))
+      },
+      {
+        title: 'Professors',
+        columns: ['Name', 'Email', 'Specialization'],
+        items: professorDetails.map(prof => ({
+          Name: `<strong>${escapeHtml(prof.userName || 'Unknown')}</strong>`,
+          Email: escapeHtml(prof.userEmail || 'No email'),
+          Specialization: escapeHtml(prof.specialization || prof.Specialization || 'Not specified')
+        }))
+      }
+    ]
+  };
+
+  detailView.show(config);
 }
 
 function openCreateModal() {

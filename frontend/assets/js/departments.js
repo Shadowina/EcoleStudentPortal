@@ -1,17 +1,15 @@
 let departments = [];
 let departmentAdmins = [];
 let users = [];
-let departmentAdminMap = {}; // Map DepartmentAdminId to User info
+let departmentAdminMap = {};
 let currentDeleteId = null;
-let currentAdminProfileId = null; // Current logged-in admin's profile ID
+let currentAdminProfileId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Check if we're on the departments page
   if (!document.getElementById('departmentsTableBody')) {
     return;
   }
 
-  // Get current logged-in admin's profile ID
   const userData = auth.getUserData();
   if (userData && userData.userType === 'DepartmentAdmin' && userData.profileId) {
     currentAdminProfileId = userData.profileId;
@@ -20,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Load department admins and users first (needed for display)
   await loadDepartmentAdmins();
   await loadUsers();
   buildDepartmentAdminMap();
@@ -29,14 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   setupFormHandler();
 
-  // Check URL for action parameter (for quick action from dashboard)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('action') === 'create') {
     openCreateModal();
   }
 });
 
-// Load department admins from API
 async function loadDepartmentAdmins() {
   try {
     departmentAdmins = await api.get('/DepartmentAdmins');
@@ -46,21 +41,17 @@ async function loadDepartmentAdmins() {
   }
 }
 
-// Load users from API
 async function loadUsers() {
   try {
     users = await api.get('/Users');
   } catch (error) {
     console.error('Error loading users:', error);
-    // Don't show error for users, we can still work without names
   }
 }
 
-// Build map of DepartmentAdminId to User info
 function buildDepartmentAdminMap() {
   departmentAdminMap = {};
   departmentAdmins.forEach(admin => {
-    // Try both camelCase and PascalCase for property names (ASP.NET Core default is camelCase)
     const userId = admin.userId || admin.UserId;
     const user = users.find(u => u.id === userId || u.Id === userId);
     if (user) {
@@ -81,8 +72,6 @@ function buildDepartmentAdminMap() {
   });
 }
 
-
-// Load departments from API
 async function loadDepartments() {
   try {
     departments = await api.get('/Departments');
@@ -98,12 +87,10 @@ async function loadDepartments() {
   }
 }
 
-// Render departments table
 function renderDepartmentsTable() {
   const tbody = document.getElementById('departmentsTableBody');
   if (!tbody) return;
 
-  // Filter to show only departments owned by current admin
   const myDepartments = departments.filter(dept => {
     const deptAdminId = dept.departmentAdminId || dept.DepartmentAdminId;
     return deptAdminId === currentAdminProfileId;
@@ -119,7 +106,6 @@ function renderDepartmentsTable() {
   }
 
   tbody.innerHTML = myDepartments.map(dept => {
-    // Try both camelCase and PascalCase for property names
     const deptId = dept.id || dept.Id;
     const deptAdminId = dept.departmentAdminId || dept.DepartmentAdminId;
     const deptName = dept.departmentName || dept.DepartmentName;
@@ -131,14 +117,14 @@ function renderDepartmentsTable() {
     };
 
     return `
-      <tr>
+      <tr data-clickable="true" data-department-id="${deptId}">
         <td><strong>${escapeHtml(deptName)}</strong></td>
         <td>${deptDesc ? escapeHtml(deptDesc) : '<span class="text-muted">No description</span>'}</td>
         <td>
           <div>${escapeHtml(adminInfo.name)}</div>
           ${adminInfo.email ? `<small class="text-muted">${escapeHtml(adminInfo.email)}</small>` : ''}
         </td>
-        <td class="text-end">
+        <td class="text-end" onclick="event.stopPropagation()">
           <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('${deptId}')">
             <i class="bi bi-pencil"></i> Edit
           </button>
@@ -149,9 +135,88 @@ function renderDepartmentsTable() {
       </tr>
     `;
   }).join('');
+  
+  setupRowClickHandlers();
 }
 
-// Open create modal
+function setupRowClickHandlers() {
+  const tbody = document.getElementById('departmentsTableBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-clickable="true"]');
+  rows.forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) {
+        return;
+      }
+      const departmentId = row.getAttribute('data-department-id');
+      if (departmentId) {
+        openDepartmentDetailView(departmentId);
+      }
+    });
+  });
+}
+
+async function openDepartmentDetailView(departmentId) {
+  const department = departments.find(d => (d.id || d.Id) === departmentId);
+  if (!department) {
+    showAlert('Department not found.', 'danger');
+    return;
+  }
+
+  const deptAdminId = department.departmentAdminId || department.DepartmentAdminId;
+  const adminInfo = departmentAdminMap[deptAdminId] || {
+    name: 'Unknown Admin',
+    email: ''
+  };
+
+  let programmes = [];
+  try {
+    const allProgrammes = await api.get('/Programmes');
+    programmes = allProgrammes.filter(prog => {
+      const progDeptId = prog.departmentId || prog.DepartmentId;
+      return progDeptId === departmentId;
+    });
+  } catch (error) {
+    console.error('Error loading programmes:', error);
+  }
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    if (typeof date === 'string') {
+      return new Date(date).toLocaleDateString();
+    }
+    return date.toLocaleDateString();
+  };
+
+  const config = {
+    title: `Department: ${department.departmentName || department.DepartmentName}`,
+    sections: [
+      {
+        title: 'Department Information',
+        items: [
+          { label: 'Name', value: department.departmentName || department.DepartmentName },
+          { label: 'Description', value: department.description || department.Description || 'No description' },
+          { label: 'Department Admin', value: adminInfo.name + (adminInfo.email ? ` (${adminInfo.email})` : '') }
+        ]
+      }
+    ],
+    subItems: [
+      {
+        title: 'Programmes',
+        columns: ['Name', 'Session Start', 'Session End'],
+        items: programmes.map(prog => ({
+          Name: `<strong>${escapeHtml(prog.programmeName || prog.ProgrammeName)}</strong>`,
+          'Session Start': formatDate(prog.sessionStart || prog.SessionStart),
+          'Session End': formatDate(prog.sessionEnd || prog.SessionEnd)
+        }))
+      }
+    ]
+  };
+
+  detailView.show(config);
+}
+
 function openCreateModal() {
   if (!currentAdminProfileId) {
     showAlert('Error: Could not determine current admin. Please login again.', 'danger');
@@ -167,7 +232,6 @@ function openCreateModal() {
   modal.show();
 }
 
-// Open edit modal
 function openEditModal(departmentId) {
   const department = departments.find(d => (d.id || d.Id) === departmentId);
   if (!department) {
@@ -175,7 +239,6 @@ function openEditModal(departmentId) {
     return;
   }
 
-  // Check if current admin owns this department
   const deptAdminId = department.departmentAdminId || department.DepartmentAdminId;
   if (deptAdminId !== currentAdminProfileId) {
     showAlert('You can only edit departments assigned to you.', 'warning');
@@ -209,7 +272,6 @@ function setupFormHandler() {
     const departmentName = document.getElementById('departmentName').value.trim();
     const description = document.getElementById('departmentDescription').value.trim();
 
-    // Use current logged-in admin's profile ID
     if (!currentAdminProfileId) {
       showAlert('Error: Could not determine current admin. Please login again.', 'danger');
       return;
@@ -220,8 +282,6 @@ function setupFormHandler() {
       description: description || null,
       departmentAdminId: currentAdminProfileId
     };
-    // Note: ID is not sent in body - for PUT requests, ID is in URL path
-    // For POST requests, backend generates the ID
 
     const submitBtn = document.getElementById('departmentSubmitBtn');
     const originalText = submitBtn.textContent;
@@ -230,16 +290,13 @@ function setupFormHandler() {
 
     try {
       if (departmentId) {
-        // Update existing department
         await api.put(`/Departments/${departmentId}`, departmentData);
         showAlert('Department updated successfully!', 'success');
       } else {
-        // Create new department
         await api.post('/Departments', departmentData);
         showAlert('Department created successfully!', 'success');
       }
 
-      // Close modal and reload departments
       const modal = bootstrap.Modal.getInstance(document.getElementById('departmentModal'));
       modal.hide();
       await loadDepartments();
@@ -271,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
 
       try {
-        // Check if current admin owns this department
         const department = departments.find(d => (d.id || d.Id) === currentDeleteId);
         if (department) {
           const deptAdminId = department.departmentAdminId || department.DepartmentAdminId;
@@ -285,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // First, check if department has programmes
         const programmes = await api.get('/Programmes').catch(() => []);
         const departmentProgrammes = programmes.filter(p => 
           (p.departmentId || p.DepartmentId) === currentDeleteId
@@ -300,11 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Delete department
         await api.delete(`/Departments/${currentDeleteId}`);
         showAlert('Department deleted successfully!', 'success');
 
-        // Close modal and reload departments
         const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
         modal.hide();
         await loadDepartments();
@@ -335,7 +388,6 @@ function showAlert(message, type = 'info') {
   container.innerHTML = '';
   container.appendChild(alertDiv);
 
-  // Auto-dismiss after 5 seconds
   setTimeout(() => {
     if (alertDiv.parentNode) {
       alertDiv.remove();
@@ -343,7 +395,6 @@ function showAlert(message, type = 'info') {
   }, 5000);
 }
 
-// Escape HTML to prevent XSS
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;

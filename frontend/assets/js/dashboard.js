@@ -1,16 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Check if we're on the dashboard page
   if (!document.getElementById('statProgrammes')) {
     return;
   }
 
   await loadDashboardStats();
 
-  // Check if departments exist to enable/disable "Create Programme" quick action
   await checkDepartmentDependency();
 });
 
-// Load dashboard statistics from API
 async function loadDashboardStats() {
   try {
     // Fetch all stats in parallel
@@ -35,7 +32,6 @@ async function loadDashboardStats() {
   }
 }
 
-// Update a stat card with the given value
 function updateStatCard(elementId, value) {
   const element = document.getElementById(elementId);
   if (element) {
@@ -43,17 +39,14 @@ function updateStatCard(elementId, value) {
   }
 }
 
-// Check if departments exist and update "Create Programme" quick action accordingly
 async function checkDepartmentDependency() {
   try {
-    // Get current admin's profile ID
     const userData = auth.getUserData();
     if (!userData || !userData.profileId) {
       return;
     }
 
     const allDepartments = await api.get('/Departments').catch(() => []);
-    // Filter to only count departments owned by current admin
     const myDepartments = allDepartments.filter(dept => {
       const deptAdminId = dept.departmentAdminId || dept.DepartmentAdminId;
       return deptAdminId === userData.profileId;
@@ -67,7 +60,6 @@ async function checkDepartmentDependency() {
       programmeQuickAction.style.pointerEvents = 'none';
       programmeQuickAction.style.opacity = '0.6';
       
-      // Update the text to show why it's disabled
       const textElement = programmeQuickAction.querySelector('strong');
       if (textElement) {
         textElement.textContent = 'Create Programme (Requires Department)';

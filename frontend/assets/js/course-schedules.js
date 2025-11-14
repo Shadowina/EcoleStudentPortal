@@ -4,17 +4,13 @@ let courseMap = {};
 let currentDeleteId = null;
 let filteredSchedules = [];
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
-  // Check if we're on the course schedules page
   if (!document.getElementById('schedulesTableBody')) {
     return;
   }
 
-  // Load courses first (needed for dropdown and validation)
   await loadCourses();
   
-  // Check if courses exist
   if (courses.length === 0) {
     document.getElementById('schedulesTableBody').innerHTML = `
       <tr>
@@ -47,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Load courses from API
 async function loadCourses() {
   try {
     courses = await api.get('/Courses');
@@ -59,7 +54,6 @@ async function loadCourses() {
   }
 }
 
-// Build map of CourseId to Course info
 function buildCourseMap() {
   courseMap = {};
   courses.forEach(course => {
@@ -73,9 +67,7 @@ function buildCourseMap() {
   });
 }
 
-// Populate course dropdowns
 function populateCourseDropdowns() {
-  // Populate schedule form dropdown
   const scheduleSelect = document.getElementById('scheduleCourseId');
   if (scheduleSelect) {
     scheduleSelect.innerHTML = '<option value="">Select Course...</option>';
@@ -89,7 +81,6 @@ function populateCourseDropdowns() {
     });
   }
 
-  // Populate filter dropdown
   const filterSelect = document.getElementById('filterCourse');
   if (filterSelect) {
     filterSelect.innerHTML = '<option value="">All Courses</option>';
@@ -104,7 +95,6 @@ function populateCourseDropdowns() {
   }
 }
 
-// Load schedules from API
 async function loadSchedules() {
   try {
     schedules = await api.get('/CourseSchedules');
@@ -135,7 +125,6 @@ function renderSchedulesTable() {
   }
 
   tbody.innerHTML = filteredSchedules.map(schedule => {
-    // Try both camelCase and PascalCase for property names
     const scheduleId = schedule.id || schedule.Id;
     const location = schedule.location || schedule.Location;
     const date = schedule.date || schedule.Date;
@@ -143,14 +132,11 @@ function renderSchedulesTable() {
     const endTime = schedule.endTime || schedule.EndTime;
     const courseId = schedule.courseId || schedule.CourseId;
     
-    // Get course info from navigation property or map
     const course = schedule.course || schedule.Course;
     const courseName = course ? (course.courseName || course.CourseName) : (courseMap[courseId]?.name || 'Unknown Course');
 
-    // Format date (assuming YYYY-MM-DD format)
     const formattedDate = formatDate(date);
     
-    // Format time (assuming HH:mm format or TimeOnly)
     const formattedStartTime = formatTime(startTime);
     const formattedEndTime = formatTime(endTime);
 
@@ -174,7 +160,6 @@ function renderSchedulesTable() {
   }).join('');
 }
 
-// Format date from API response
 function formatDate(dateValue) {
   if (!dateValue) return 'N/A';
   
@@ -194,7 +179,6 @@ function formatDate(dateValue) {
   return String(dateValue);
 }
 
-// Format time from API response
 function formatTime(timeValue) {
   if (!timeValue) return 'N/A';
   
@@ -214,7 +198,6 @@ function formatTime(timeValue) {
   return String(timeValue);
 }
 
-// Convert date to YYYY-MM-DD format for API
 function formatDateForAPI(dateValue) {
   if (!dateValue) return '';
   
@@ -241,7 +224,6 @@ function formatDateForAPI(dateValue) {
   return '';
 }
 
-// Convert time to HH:mm format for API
 function formatTimeForAPI(timeValue) {
   if (!timeValue) return '';
   
@@ -320,7 +302,6 @@ function setupFormHandler() {
     e.preventDefault();
     e.stopPropagation();
 
-    // Validate times
     if (!validateTimes()) {
       form.classList.add('was-validated');
       return;
@@ -338,7 +319,6 @@ function setupFormHandler() {
     const startTime = document.getElementById('scheduleStartTime').value;
     const endTime = document.getElementById('scheduleEndTime').value;
 
-    // Validate course exists
     if (!courseMap[courseId]) {
       showAlert('Please select a valid course.', 'danger');
       return;
@@ -359,11 +339,9 @@ function setupFormHandler() {
 
     try {
       if (scheduleId) {
-        // Update existing schedule
         await api.put(`/CourseSchedules/${scheduleId}`, scheduleData);
         showAlert('Schedule updated successfully!', 'success');
       } else {
-        // Create new schedule
         await api.post('/CourseSchedules', scheduleData);
         showAlert('Schedule created successfully!', 'success');
       }
@@ -382,7 +360,6 @@ function setupFormHandler() {
   });
 }
 
-// Validate that end time is after start time
 function validateTimes() {
   const startTimeInput = document.getElementById('scheduleStartTime');
   const endTimeInput = document.getElementById('scheduleEndTime');
@@ -424,12 +401,10 @@ function applyFilters() {
     const courseId = schedule.courseId || schedule.CourseId;
     const date = schedule.date || schedule.Date;
     
-    // Filter by course
     if (courseFilter && courseId !== courseFilter) {
       return false;
     }
     
-    // Filter by date
     if (dateFilter) {
       const scheduleDate = formatDateForAPI(date);
       if (scheduleDate !== dateFilter) {
@@ -468,7 +443,6 @@ function setupDeleteHandler() {
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
 
       try {
-        // Delete schedule
         await api.delete(`/CourseSchedules/${currentDeleteId}`);
         showAlert('Schedule deleted successfully!', 'success');
 
@@ -504,7 +478,6 @@ function showAlert(message, type = 'info') {
   container.innerHTML = '';
   container.appendChild(alertDiv);
 
-  // Auto-dismiss after 5 seconds
   setTimeout(() => {
     if (alertDiv.parentNode) {
       alertDiv.remove();
@@ -512,7 +485,6 @@ function showAlert(message, type = 'info') {
   }, 5000);
 }
 
-// Escape HTML to prevent XSS
 function escapeHtml(text) {
   if (!text) return '';
   const div = document.createElement('div');

@@ -19,7 +19,6 @@ namespace EcoleStudentPortal
             // This will override appsettings.json values since it's loaded after
             builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
             
-            // Configure database based on connection string
             var connectionString = builder.Configuration.GetConnectionString("EcoleStudentPortalContext") 
                 ?? throw new InvalidOperationException("Connection string 'EcoleStudentPortalContext' not found.");
             
@@ -45,11 +44,11 @@ namespace EcoleStudentPortal
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
+                
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Add JWT Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -68,7 +67,6 @@ namespace EcoleStudentPortal
 
             builder.Services.AddAuthorization();
 
-            // Add CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
@@ -81,7 +79,6 @@ namespace EcoleStudentPortal
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -95,7 +92,7 @@ namespace EcoleStudentPortal
 
             app.MapControllers();
 
-            // addition for database creation
+            // additional code for database creation
 #pragma warning disable CS8602 // Dereferencing a possible null reference.
             using (var serviceScope = app.Services.GetService<IServiceScopeFactory>().CreateScope())
 #pragma warning restore CS8602 // Dereferencing a possible null reference.
@@ -104,7 +101,6 @@ namespace EcoleStudentPortal
                 //context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
                 
-                // Create master admin user
                 SeedMasterAdmin(context);
             }
 
@@ -116,14 +112,12 @@ namespace EcoleStudentPortal
             const string adminEmail = "admin@ecole.com";
             const string adminPassword = "password";
 
-            // Check if admin already exists
             var existingAdmin = context.Users.FirstOrDefault(u => u.Email == adminEmail);
             if (existingAdmin != null)
             {
                 return; 
             }
 
-            // Create master admin user
             var adminUser = new User
             {
                 Id = Guid.NewGuid(),
@@ -138,7 +132,6 @@ namespace EcoleStudentPortal
 
             context.Users.Add(adminUser);
 
-            // Create DepartmentAdmin profile
             var departmentAdmin = new DepartmentAdmin
             {
                 Id = Guid.NewGuid(),

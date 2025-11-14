@@ -50,21 +50,18 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProgramme(Guid id, ProgrammeRequest request)
         {
-            // Validate that Department exists
             var department = await _context.Departments.FindAsync(request.DepartmentId);
             if (department == null)
             {
                 return BadRequest(new { message = "Department not found." });
             }
 
-            // Get the existing programme from the database
             var existingProgramme = await _context.Programmes.FindAsync(id);
             if (existingProgramme == null)
             {
                 return NotFound();
             }
 
-            // Validate session dates
             if (request.SessionEnd <= request.SessionStart)
             {
                 return BadRequest(new { message = "Session end date must be after session start date." });
@@ -100,20 +97,17 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<Programme>> PostProgramme(ProgrammeRequest request)
         {
-            // Validate that Department exists
             var department = await _context.Departments.FindAsync(request.DepartmentId);
             if (department == null)
             {
                 return BadRequest(new { message = "Department not found." });
             }
 
-            // Validate session dates
             if (request.SessionEnd <= request.SessionStart)
             {
                 return BadRequest(new { message = "Session end date must be after session start date." });
             }
 
-            // Create new programme entity
             var programme = new Programme
             {
                 Id = Guid.NewGuid(),

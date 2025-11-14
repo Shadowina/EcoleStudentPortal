@@ -26,7 +26,6 @@ namespace EcoleStudentPortal.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure User relationships
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.User)
                 .WithMany()
@@ -45,15 +44,12 @@ namespace EcoleStudentPortal.Data
                 .HasForeignKey(da => da.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Configure Grade entity with composite primary key
             modelBuilder.Entity<Grade>()
                 .HasKey(g => new { g.StudentId, g.CourseId });
 
-            // Configure ProfessorCourse entity with composite primary key
             modelBuilder.Entity<ProfessorCourse>()
                 .HasKey(pc => new { pc.ProfessorId, pc.CourseId });
 
-            // Configure ProgrammeCourse entity with composite primary key
             modelBuilder.Entity<ProgrammeCourse>()
                 .HasKey(pc => new { pc.ProgrammeId, pc.CourseId });
         }

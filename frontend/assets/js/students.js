@@ -2,17 +2,16 @@ let students = [];
 let programmes = [];
 let courses = [];
 let users = [];
-let programmeMap = {}; // Map ProgrammeId to Programme info
-let userMap = {}; // Map UserId to User info
-let courseMap = {}; // Map CourseId to Course info
-let grades = []; // All grades
-let studentGradesMap = {}; // Map StudentId to array of Grades
+let programmeMap = {};
+let userMap = {};
+let courseMap = {};
+let grades = [];
+let studentGradesMap = {};
 let currentDeleteId = null;
-let currentAdminProfileId = null; // Current logged-in admin's profile ID
-let myDepartmentIds = []; // IDs of departments owned by current admin
-let myProgrammeIds = []; // IDs of programmes from admin's departments
-let currentStudentIdForGrades = null; // Current student ID for grades modal
-let currentGradeCourseId = null; // Current course ID for grade edit
+let currentAdminProfileId = null;
+let myDepartmentIds = [];
+let myProgrammeIds = [];
+let currentStudentIdForGrades = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // Check if we're on the students page
@@ -44,8 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFormHandler();
 
   setupDeleteHandler();
-
-  setupGradeFormHandler();
 });
 
 // Load departments from API (only those owned by current admin)
@@ -119,7 +116,6 @@ async function loadCourses() {
   try {
     courses = await api.get('/Courses');
     buildCourseMap();
-    populateGradeCourseDropdown();
   } catch (error) {
     console.error('Error loading courses:', error);
   }
@@ -139,22 +135,6 @@ function buildCourseMap() {
   });
 }
 
-// Populate grade course dropdown
-function populateGradeCourseDropdown() {
-  const select = document.getElementById('gradeCourseSelect');
-  if (!select) return;
-
-  select.innerHTML = '<option value="">Select Course...</option>';
-  
-  courses.forEach(course => {
-    const courseId = course.id || course.Id;
-    const courseName = course.courseName || course.CourseName;
-    const option = document.createElement('option');
-    option.value = courseId;
-    option.textContent = courseName;
-    select.appendChild(option);
-  });
-}
 
 // Load users from API
 async function loadUsers() {
@@ -280,7 +260,7 @@ function renderStudentsTable() {
   if (students.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center text-muted">No students found. Students are created through the registration system.</td>
+        <td colspan="5" class="text-center text-muted">No students found. Students are created through the registration system.</td>
       </tr>
     `;
     return;
@@ -295,31 +275,13 @@ function renderStudentsTable() {
     const userInfo = getUserInfoFromStudent(student);
     const progInfo = getProgrammeInfoFromStudent(student);
 
-    // Get grade count
-    const studentKey = String(studentId);
-    const studentGrades = studentGradesMap[studentKey] || [];
-    const gradeCount = studentGrades.length;
-    const gradeLabel = gradeCount === 1 ? 'grade' : 'grades';
-    const gradeBadge = gradeCount > 0
-      ? `<span class="badge bg-info">${gradeCount} ${gradeLabel}</span>`
-      : '<span class="badge bg-secondary">0 grades</span>';
-
-    const averageGradeDisplay = averageGrade !== null && averageGrade !== undefined
-      ? `<span class="badge bg-success">${averageGrade.toFixed(2)}%</span>`
-      : '<span class="text-muted">N/A</span>';
-
     return `
-      <tr>
+      <tr data-clickable="true" data-student-id="${studentId}">
         <td><strong>${escapeHtml(userInfo.name)}</strong></td>
         <td>${escapeHtml(userInfo.email)}</td>
         <td><span class="badge bg-primary">Year ${year}</span></td>
         <td>${progInfo ? escapeHtml(progInfo.name) : '<span class="text-muted">No programme</span>'}</td>
-        <td>${averageGradeDisplay}</td>
-        <td>${gradeBadge}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-secondary me-2" onclick="openGradesModal('${studentId}')">
-            <i class="bi bi-clipboard-data"></i> Grades
-          </button>
+        <td class="text-end" onclick="event.stopPropagation()">
           <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('${studentId}')">
             <i class="bi bi-pencil"></i> Edit
           </button>
@@ -330,6 +292,115 @@ function renderStudentsTable() {
       </tr>
     `;
   }).join('');
+  
+  setupRowClickHandlers();
+}
+
+function setupRowClickHandlers() {
+  const tbody = document.getElementById('studentsTableBody');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-clickable="true"]');
+  rows.forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button')) {
+        return;
+      }
+      const studentId = row.getAttribute('data-student-id');
+      if (studentId) {
+        openStudentDetailView(studentId);
+      }
+    });
+  });
+}
+
+async function openStudentDetailView(studentId) {
+  const student = students.find(s => (s.id || s.Id) === studentId);
+  if (!student) {
+    showAlert('Student not found.', 'danger');
+    return;
+  }
+
+  const userInfo = getUserInfoFromStudent(student);
+  const progInfo = getProgrammeInfoFromStudent(student);
+  const year = student.year || student.Year;
+  const averageGrade = student.averageGrade || student.AverageGrade;
+
+  let studentGrades = [];
+  let gradeDetails = [];
+  try {
+    studentGrades = await api.get(`/Grades/student/${studentId}`);
+    
+    for (const grade of studentGrades) {
+      const courseId = grade.courseId || grade.CourseId;
+      const courseInfo = courseMap[courseId] || {
+        name: 'Unknown Course',
+        description: '',
+        creditWeight: 0
+      };
+      gradeDetails.push({
+        courseName: courseInfo.name,
+        score: grade.score || grade.Score
+      });
+    }
+  } catch (error) {
+    console.error('Error loading student grades:', error);
+  }
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    if (typeof date === 'string') {
+      return new Date(date).toLocaleDateString();
+    }
+    return date.toLocaleDateString();
+  };
+
+  const sections = [
+    {
+      title: 'Student Information',
+      items: [
+        { label: 'Name', value: userInfo.name },
+        { label: 'Email', value: userInfo.email || 'No email' },
+        { label: 'Year', value: `Year ${year}` },
+        { label: 'Average Grade', value: averageGrade !== null && averageGrade !== undefined 
+          ? `${averageGrade.toFixed(2)}%` 
+          : 'Not calculated' }
+      ]
+    }
+  ];
+
+  if (progInfo) {
+    sections.push({
+      title: 'Programme Enrolled',
+      items: [
+        { label: 'Programme Name', value: progInfo.name },
+        { label: 'Session Start', value: formatDate(progInfo.sessionStart) },
+        { label: 'Session End', value: formatDate(progInfo.sessionEnd) }
+      ]
+    });
+  }
+
+  const config = {
+    title: `Student: ${userInfo.name}`,
+    sections: sections,
+    subItems: [
+      {
+        title: 'Grades',
+        columns: ['Course', 'Score'],
+        items: gradeDetails.map(grade => {
+          const score = grade.score !== null && grade.score !== undefined
+            ? `<span class="badge ${grade.score >= 70 ? 'bg-success' : grade.score >= 50 ? 'bg-warning' : 'bg-danger'}">${grade.score.toFixed(2)}%</span>`
+            : '<span class="text-muted">Not graded</span>';
+          return {
+            Course: `<strong>${escapeHtml(grade.courseName)}</strong>`,
+            Score: score
+          };
+        })
+      }
+    ]
+  };
+
+  detailView.show(config);
 }
 
 // Open edit modal
@@ -478,7 +549,7 @@ async function openGradesModal(studentId) {
 
   const userInfo = getUserInfoFromStudent(student);
   const studentName = userInfo.name || 'Student';
-  document.getElementById('gradesModalLabel').textContent = `Manage Grades · ${studentName}`;
+  document.getElementById('gradesModalLabel').textContent = `View Grades · ${studentName}`;
   document.getElementById('gradesStudentName').textContent = studentName;
 
   // Load grades for this student
@@ -511,7 +582,7 @@ function renderGradesTable(studentGrades) {
   if (studentGrades.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="3" class="text-center text-muted">No grades found. Click "Add Grade" to add one.</td>
+        <td colspan="2" class="text-center text-muted">No grades found for this student.</td>
       </tr>
     `;
     return;
@@ -535,143 +606,9 @@ function renderGradesTable(studentGrades) {
       <tr>
         <td><strong>${escapeHtml(courseInfo.name)}</strong></td>
         <td>${scoreDisplay}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditGradeModal('${courseId}')">
-            <i class="bi bi-pencil"></i> Edit
-          </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="openDeleteGradeModal('${courseId}')">
-            <i class="bi bi-trash"></i> Delete
-          </button>
-        </td>
       </tr>
     `;
   }).join('');
-}
-
-// Open add grade modal
-function openAddGradeModal() {
-  currentGradeCourseId = null;
-  const modal = new bootstrap.Modal(document.getElementById('gradeModal'));
-  document.getElementById('gradeModalLabel').textContent = 'Add Grade';
-  document.getElementById('gradeSubmitBtn').textContent = 'Save';
-  document.getElementById('gradeForm').reset();
-  document.getElementById('gradeStudentId').value = currentStudentIdForGrades;
-  document.getElementById('gradeCourseId').value = '';
-  document.getElementById('gradeForm').classList.remove('was-validated');
-  modal.show();
-}
-
-// Open edit grade modal
-async function openEditGradeModal(courseId) {
-  currentGradeCourseId = courseId;
-
-  try {
-    const grade = await api.get(`/Grades/${currentStudentIdForGrades}/${courseId}`);
-    const score = grade.score || grade.Score;
-
-    const modal = new bootstrap.Modal(document.getElementById('gradeModal'));
-    document.getElementById('gradeModalLabel').textContent = 'Edit Grade';
-    document.getElementById('gradeSubmitBtn').textContent = 'Update';
-    document.getElementById('gradeStudentId').value = currentStudentIdForGrades;
-    document.getElementById('gradeCourseId').value = courseId;
-    document.getElementById('gradeCourseSelect').value = courseId;
-    document.getElementById('gradeCourseSelect').disabled = true; // Can't change course
-    document.getElementById('gradeScore').value = score !== null && score !== undefined ? score : '';
-    document.getElementById('gradeForm').classList.remove('was-validated');
-    modal.show();
-  } catch (error) {
-    console.error('Error loading grade:', error);
-    showGradesAlert('Error loading grade. Please try again.', 'danger');
-  }
-}
-
-// Open delete grade modal
-async function openDeleteGradeModal(courseId) {
-  if (!confirm('Are you sure you want to delete this grade?')) {
-    return;
-  }
-
-  try {
-    await api.delete(`/Grades/${currentStudentIdForGrades}/${courseId}`);
-    showGradesAlert('Grade deleted successfully!', 'success');
-    await loadStudentGrades(currentStudentIdForGrades);
-    await loadGrades(); // Reload all grades
-    renderStudentsTable(); // Update students table
-  } catch (error) {
-    console.error('Error deleting grade:', error);
-    showGradesAlert(error.message || 'Error deleting grade. Please try again.', 'danger');
-  }
-}
-
-// Setup grade form handler
-function setupGradeFormHandler() {
-  const form = document.getElementById('gradeForm');
-  if (!form) return;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!form.checkValidity()) {
-      form.classList.add('was-validated');
-      return;
-    }
-
-    const studentId = document.getElementById('gradeStudentId').value;
-    const courseId = document.getElementById('gradeCourseSelect').value;
-    const score = document.getElementById('gradeScore').value;
-
-    if (!courseId) {
-      showGradesAlert('Please select a course.', 'danger');
-      return;
-    }
-
-    // Validate score if provided
-    if (score) {
-      const scoreNum = parseFloat(score);
-      if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100) {
-        showGradesAlert('Score must be between 0 and 100.', 'danger');
-        return;
-      }
-    }
-
-    const gradeData = {
-      studentId: studentId,
-      courseId: courseId,
-      score: score ? parseFloat(score) : null
-    };
-
-    const submitBtn = document.getElementById('gradeSubmitBtn');
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
-
-    try {
-      if (currentGradeCourseId) {
-        // Update existing grade
-        await api.put(`/Grades/${studentId}/${courseId}`, gradeData);
-        showGradesAlert('Grade updated successfully!', 'success');
-      } else {
-        // Create new grade
-        await api.post('/Grades', gradeData);
-        showGradesAlert('Grade added successfully!', 'success');
-      }
-
-      // Close modal and reload grades
-      const modal = bootstrap.Modal.getInstance(document.getElementById('gradeModal'));
-      modal.hide();
-      document.getElementById('gradeCourseSelect').disabled = false; // Re-enable course select
-      await loadStudentGrades(studentId);
-      await loadGrades(); // Reload all grades
-      renderStudentsTable(); // Update students table
-    } catch (error) {
-      console.error('Error saving grade:', error);
-      showGradesAlert(error.message || 'Error saving grade. Please try again.', 'danger');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    }
-  });
 }
 
 // Show alert in grades modal

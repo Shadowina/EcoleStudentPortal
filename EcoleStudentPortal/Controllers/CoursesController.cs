@@ -49,7 +49,6 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCourse(Guid id, Course course)
         {
-            // Get the existing course from the database
             var existingCourse = await _context.Courses.FindAsync(id);
             if (existingCourse == null)
             {
@@ -85,7 +84,6 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<Course>> PostCourse(Course course)
         {
-            // Generate ID if not provided or empty
             if (course.Id == Guid.Empty)
             {
                 course.Id = Guid.NewGuid();
@@ -107,28 +105,24 @@ namespace EcoleStudentPortal.Controllers
                 return NotFound();
             }
 
-            // Check if course has schedules
             var hasSchedules = await _context.CourseSchedules.AnyAsync(cs => cs.CourseId == id);
             if (hasSchedules)
             {
                 return BadRequest(new { message = "Cannot delete course. It has schedules assigned. Please remove schedules first." });
             }
 
-            // Check if course has grades
             var hasGrades = await _context.Grades.AnyAsync(g => g.CourseId == id);
             if (hasGrades)
             {
                 return BadRequest(new { message = "Cannot delete course. It has grades assigned. Please remove grades first." });
             }
 
-            // Check if course is assigned to professors
             var hasProfessorCourses = await _context.ProfessorCourses.AnyAsync(pc => pc.CourseId == id);
             if (hasProfessorCourses)
             {
                 return BadRequest(new { message = "Cannot delete course. It is assigned to professors. Please remove professor assignments first." });
             }
 
-            // Check if course is assigned to programmes
             var hasProgrammeCourses = await _context.ProgrammeCourses.AnyAsync(pc => pc.CourseId == id);
             if (hasProgrammeCourses)
             {

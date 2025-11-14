@@ -14,7 +14,7 @@ namespace EcoleStudentPortal.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Requires authentication
+    [Authorize]
     public class DepartmentsController : ControllerBase
     {
         private readonly EcoleStudentPortalContext _context;
@@ -50,14 +50,12 @@ namespace EcoleStudentPortal.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDepartment(Guid id, DepartmentRequest request)
         {
-            // Validate that DepartmentAdmin exists
             var departmentAdmin = await _context.DepartmentAdmins.FindAsync(request.DepartmentAdminId);
             if (departmentAdmin == null)
             {
                 return BadRequest(new { message = "DepartmentAdmin not found." });
             }
 
-            // Get the existing department from the database
             var existingDepartment = await _context.Departments.FindAsync(id);
             if (existingDepartment == null)
             {
@@ -93,14 +91,12 @@ namespace EcoleStudentPortal.Controllers
         [HttpPost]
         public async Task<ActionResult<Department>> PostDepartment(DepartmentRequest request)
         {
-            // Validate that DepartmentAdmin exists
             var departmentAdmin = await _context.DepartmentAdmins.FindAsync(request.DepartmentAdminId);
             if (departmentAdmin == null)
             {
                 return BadRequest(new { message = "DepartmentAdmin not found." });
             }
 
-            // Create new department entity
             var department = new Department
             {
                 Id = Guid.NewGuid(),
