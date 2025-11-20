@@ -14,7 +14,7 @@
 
 body {
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, rgba(11, 79, 108, 0.12), rgba(50, 130, 184, 0.08)), var(--ecole-light);
+  background: #ffffff;
   color: var(--ecole-dark);
   min-height: 100vh;
 }
@@ -28,8 +28,7 @@ body {
   display: flex;
   align-items: center;
   padding: 3rem 1rem;
-  background: radial-gradient(circle at top left, rgba(50, 130, 184, 0.18), transparent 60%),
-    radial-gradient(circle at bottom right, rgba(249, 168, 38, 0.18), transparent 55%);
+  background: #ffffff;
 }
 
 .auth-card {
@@ -40,7 +39,7 @@ body {
 }
 
 .auth-card .card-header {
-  background: linear-gradient(135deg, var(--ecole-primary), var(--ecole-secondary));
+  background: var(--ecole-primary);
   color: white;
   padding: 2rem;
 }
@@ -96,13 +95,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--ecole-primary), var(--ecole-secondary));
+  background: var(--ecole-primary);
   border: none;
   color: white;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #094a63, #2a72a0);
+  background: #094a63;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(11, 79, 108, 0.3);
   color: white;

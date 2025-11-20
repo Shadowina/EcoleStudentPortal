@@ -6,7 +6,7 @@
   --sidebar-text: #0c1c2c;
   --sidebar-hover: #f7fafc;
   --sidebar-active: #e8f4f8;
-  --content-bg: #f7fafc;
+  --content-bg: #ffffff;
   --border-color: #e5e7eb;
 }
 
@@ -72,7 +72,7 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ecole-primary), var(--ecole-secondary));
+  background: var(--ecole-primary);
   display: flex;
   align-items: center;
   justify-content: center;
