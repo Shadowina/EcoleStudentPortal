@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       if (confirm('Are you sure you want to logout?')) {
         auth.clearAuth();
-        window.location.href = 'login.html';
+        window.location.href = auth.getLoginUrl();
       }
     });
   });
